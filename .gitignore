@@ -191,3 +191,4 @@ FakesAssemblies/
 .vs/
 
 /src/MiNET/MiNET.Console/dist
+*.2020-05-07

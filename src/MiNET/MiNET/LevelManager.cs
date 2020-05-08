@@ -67,6 +67,9 @@ namespace MiNET
 					case "experimental":
 						worldProvider = new ExperimentalWorldProvider();
 						break;
+					case "new":
+						worldProvider = new NewWorldProvider();
+						break;
 					case "anvil":
 					case "flat":
 					case "flatland":
