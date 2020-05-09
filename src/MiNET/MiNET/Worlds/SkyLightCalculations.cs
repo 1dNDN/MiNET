@@ -33,9 +33,12 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+
 using log4net;
+
 using MiNET.Blocks;
 using MiNET.Utils;
+
 using SharpAvi;
 using SharpAvi.Output;
 
@@ -46,7 +49,7 @@ namespace MiNET.Worlds
 		private readonly IWorldProvider _worldProvider;
 		private readonly int _heightForUnloadedChunk;
 		private readonly ChunkCoordinates _coord = ChunkCoordinates.None;
-		private readonly ChunkColumn _chunk = null;
+		private readonly ChunkColumn _chunk;
 
 		public SkyLightBlockAccess(IWorldProvider worldProvider, int heightForUnloadedChunk = 255)
 		{
@@ -217,7 +220,7 @@ namespace MiNET.Worlds
 
 					calculator.RenderVideo();
 
-					Log.Debug($"Movie rendered.");
+					Log.Debug("Movie rendered.");
 				});
 			}
 
@@ -422,7 +425,7 @@ namespace MiNET.Worlds
 					ChunkColumn chunk = level.GetChunk(coordinates);
 					if (chunk == null)
 					{
-						Log.Warn($"Chunk was null");
+						Log.Warn("Chunk was null");
 						continue;
 					}
 
@@ -432,7 +435,7 @@ namespace MiNET.Worlds
 						chunk = level.GetChunk(newChunkCoord);
 						if (chunk == null)
 						{
-							Log.Warn($"Chunk with new coords was null");
+							Log.Warn("Chunk with new coords was null");
 							continue;
 						}
 					}
@@ -905,11 +908,11 @@ namespace MiNET.Worlds
 						//Bitmap image = (Bitmap) Image.FromFile(file);
 						//image = new Bitmap(image, stream.Width, stream.Height);
 
-						byte[] imageData = (byte[]) ToByteArray(image, ImageFormat.Bmp);
+						byte[] imageData = ToByteArray(image, ImageFormat.Bmp);
 
 						if (imageData == null)
 						{
-							Log.Warn($"No image data for file.");
+							Log.Warn("No image data for file.");
 							continue;
 						}
 
@@ -1070,7 +1073,7 @@ namespace MiNET.Worlds
 
 		private void InitColorsBlocks()
 		{
-			ColorsOfMap.AddRange(new Color[]
+			ColorsOfMap.AddRange(new[]
 			{
 				Color.FromArgb(Alpha, 0, 0, 0), //Black
 				Color.FromArgb(Alpha, 0, 0, 0xFF), //Blue

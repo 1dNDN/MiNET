@@ -32,8 +32,11 @@ using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
+
 using fNbt;
+
 using log4net;
+
 using MiNET.Blocks;
 using MiNET.LevelDB;
 using MiNET.Utils;
@@ -339,7 +342,7 @@ namespace MiNET.Worlds
 						coords.Add(chunkCoordinates);
 				}
 
-				Parallel.ForEach(_chunkCache, (chunkColumn) =>
+				Parallel.ForEach(_chunkCache, chunkColumn =>
 				{
 					bool keep = coords.Exists(c => c.DistanceTo(chunkColumn.Key) < maxViewDistance);
 					if (!keep)
@@ -403,7 +406,7 @@ namespace MiNET.Worlds
 
 		public int ReadSignedVarInt(ReadOnlySpan<byte> data)
 		{
-			return DecodeZigZag32((uint) ReadVarInt(data));
+			return DecodeZigZag32(ReadVarInt(data));
 		}
 
 		private static int DecodeZigZag32(uint n)

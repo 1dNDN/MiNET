@@ -31,8 +31,11 @@ using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+
 using fNbt;
+
 using log4net;
+
 using MiNET.Blocks;
 using MiNET.Net;
 using MiNET.Utils;
@@ -60,8 +63,8 @@ namespace MiNET.Worlds
 		public bool isDirty;
 		public bool isGenerated;
 		public bool IsLoaded = false;
-		public bool NeedSave = false;
-		private McpeWrapper _cachedBatch = null;
+		public bool NeedSave;
+		private McpeWrapper _cachedBatch;
 		private object _cacheSync = new object();
 
 		public ChunkColumn()
@@ -408,10 +411,10 @@ namespace MiNET.Worlds
 		}
 
 		private static long max = 0;
-		private static long count = 0;
-		private static double average = 0;
-		private static double averageSize = 0;
-		private static double averageCompressedSize = 0;
+		private static long count;
+		private static double average;
+		private static double averageSize;
+		private static double averageCompressedSize;
 
 		public McpeWrapper GetBatch()
 		{

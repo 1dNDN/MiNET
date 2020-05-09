@@ -27,7 +27,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
 using log4net;
+
 using MiNET.Blocks;
 using MiNET.Utils;
 
@@ -73,7 +75,7 @@ namespace MiNET.Worlds
 
 		public override int GetBlock(int bx, int by, int bz)
 		{
-			return _blocks[GetIndex(bx, @by, bz)];
+			return _blocks[GetIndex(bx, by, bz)];
 		}
 
 		public override void SetBlock(int bx, int by, int bz, int bid)
@@ -85,7 +87,7 @@ namespace MiNET.Worlds
 
 		public int GetLoggedBlock(int bx, int by, int bz)
 		{
-			return _loggedBlocks[GetIndex(bx, @by, bz)];
+			return _loggedBlocks[GetIndex(bx, by, bz)];
 		}
 
 		public void SetLoggedBlock(int bx, int by, int bz, int bid)
@@ -206,8 +208,6 @@ namespace MiNET.Worlds
 				case int i when i > 8:
 					//Paletted16 = 16, // 2 blocks per word
 					bitsPerBlock = 16;
-					break;
-				default:
 					break;
 			}
 

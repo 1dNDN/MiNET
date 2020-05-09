@@ -33,8 +33,11 @@ using System.Numerics;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+
 using fNbt;
+
 using log4net;
+
 using MiNET.BlockEntities;
 using MiNET.Blocks;
 using MiNET.Items;
@@ -197,7 +200,7 @@ namespace MiNET.Worlds
 				{250, new NoDataMapper(235)}, // => minecraft:black_glazed_terracotta
 
 				{251, new NoDataMapper(236)}, // => minecraft:concrete
-				{252, new NoDataMapper(237)}, // => minecraft:concrete_powder
+				{252, new NoDataMapper(237)} // => minecraft:concrete_powder
 			};
 		}
 
@@ -218,7 +221,7 @@ namespace MiNET.Worlds
 			_isInitialized = true;
 		}
 
-		private bool _isInitialized = false;
+		private bool _isInitialized;
 		private object _initializeSync = new object();
 
 		public void Initialize()
@@ -289,7 +292,7 @@ namespace MiNET.Worlds
 
 				bool save = Config.GetProperty("Save.Enabled", false);
 
-				Parallel.ForEach(_chunkCache, (chunkColumn) =>
+				Parallel.ForEach(_chunkCache, chunkColumn =>
 				{
 					bool keep = coords.Exists(c => c.DistanceTo(chunkColumn.Key) < maxViewDistance);
 					if (!keep)

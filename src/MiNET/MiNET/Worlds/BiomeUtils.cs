@@ -488,7 +488,7 @@ namespace MiNET.Worlds
 				Name = "Mesa Plateau M",
 				Temperature = 2.0f,
 				Downfall = 0.0f
-			},
+			}
 		};
 
 		private struct BiomeCorner
@@ -691,9 +691,9 @@ namespace MiNET.Worlds
 
 		public int BiomeSwampRiverColor(int color)
 		{
-			int r = (int) ((color >> 16) & 0xff);
-			int g = (int) ((color >> 8) & 0xff);
-			int b = (int) color & 0xff;
+			int r = (color >> 16) & 0xff;
+			int g = (color >> 8) & 0xff;
+			int b = color & 0xff;
 
 			// swamp color modifier is 0xE0FFAE
 			r = (r * 0xE0) / 255;

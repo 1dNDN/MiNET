@@ -24,6 +24,7 @@
 #endregion
 
 using log4net;
+
 using MiNET.BlockEntities;
 using MiNET.Utils;
 
@@ -32,10 +33,6 @@ namespace MiNET.Worlds
 	public class FlatlandWorldProvider : IWorldGenerator
 	{
 		private static readonly ILog Log = LogManager.GetLogger(typeof(FlatlandWorldProvider));
-
-		public FlatlandWorldProvider()
-		{
-		}
 
 		public void Initialize()
 		{

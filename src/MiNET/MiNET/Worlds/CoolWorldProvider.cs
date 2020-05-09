@@ -26,8 +26,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Numerics;
+
 using LibNoise;
 using LibNoise.Primitive;
+
 using MiNET.Utils;
 using MiNET.Worlds.Structures;
 
@@ -343,7 +345,7 @@ namespace MiNET.Worlds
 		Grass = 2,
 		Dirt = 3,
 		Bedrock = 7,
-		Gold = 41,
+		Gold = 41
 	}
 
 	internal enum WoodType : byte

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MiNET.Worlds.Generator
+﻿namespace MiNET.Worlds.Generator
 {
 	class MathHelper
 	{
@@ -12,10 +8,10 @@ namespace MiNET.Worlds.Generator
 			{
 				return lowerBnd;
 			}
-			else
-			{
-				return slide > 1.0D ? upperBnd : lowerBnd + (upperBnd - lowerBnd) * slide;
-			}
+
+			return slide > 1.0D ? upperBnd : lowerBnd + (upperBnd - lowerBnd) * slide;
 		}
+
+
 	}
 }

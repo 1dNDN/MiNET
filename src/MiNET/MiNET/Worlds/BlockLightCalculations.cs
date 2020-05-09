@@ -25,7 +25,9 @@
 
 using System;
 using System.Collections.Generic;
+
 using log4net;
+
 using MiNET.Blocks;
 using MiNET.Utils;
 
@@ -124,13 +126,13 @@ namespace MiNET.Worlds
 				}
 
 				b1.BlockLight = (byte) Math.Max(b1.LightLevel, lightLevel - 1);
-				chunk.SetBlocklight(b1.Coordinates.X & 0x0f, b1.Coordinates.Y & 0xff, b1.Coordinates.Z & 0x0f, (byte) b1.BlockLight);
+				chunk.SetBlocklight(b1.Coordinates.X & 0x0f, b1.Coordinates.Y & 0xff, b1.Coordinates.Z & 0x0f, b1.BlockLight);
 			}
 
 			if ((!b1.IsSolid || b1.IsTransparent) && b1.BlockLight + 2 <= lightLevel)
 			{
 				b1.BlockLight = (byte) (lightLevel - 1);
-				chunk.SetBlocklight(b1.Coordinates.X & 0x0f, b1.Coordinates.Y & 0xff, b1.Coordinates.Z & 0x0f, (byte) b1.BlockLight);
+				chunk.SetBlocklight(b1.Coordinates.X & 0x0f, b1.Coordinates.Y & 0xff, b1.Coordinates.Z & 0x0f, b1.BlockLight);
 				lightBfsQueue.Enqueue(b1.Coordinates);
 			}
 		}

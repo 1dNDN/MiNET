@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MiNET.Worlds.Generator
+﻿namespace MiNET.Worlds.Generator
 {
 	class SharedSeedRandom:LongRandom
 	{
@@ -72,7 +70,7 @@ namespace MiNET.Worlds.Generator
 
 		public static LongRandom SeedSlimeChunk(int p_205190_0_, int p_205190_1_, long p_205190_2_, long p_205190_4_)
 		{
-			return new LongRandom(p_205190_2_ + (long) (p_205190_0_ * p_205190_0_ * 4987142) + (long) (p_205190_0_ * 5947611) + (long) (p_205190_1_ * p_205190_1_) * 4392871L + (long) (p_205190_1_ * 389711) ^ p_205190_4_);
+			return new LongRandom(p_205190_2_ + p_205190_0_ * p_205190_0_ * 4987142 + p_205190_0_ * 5947611 + p_205190_1_ * p_205190_1_ * 4392871L + p_205190_1_ * 389711 ^ p_205190_4_);
 		}
 	}
 }

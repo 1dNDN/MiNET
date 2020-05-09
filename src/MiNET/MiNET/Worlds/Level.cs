@@ -32,8 +32,11 @@ using System.IO.Compression;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+
 using fNbt;
+
 using log4net;
+
 using MiNET.BlockEntities;
 using MiNET.Blocks;
 using MiNET.Entities;
@@ -63,7 +66,7 @@ namespace MiNET.Worlds
 
 		private int _worldDayCycleTime = 24000;
 
-		public PlayerLocation SpawnPoint { get; set; } = null;
+		public PlayerLocation SpawnPoint { get; set; }
 
 		public ConcurrentDictionary<long, Player> Players { get; private set; } = new ConcurrentDictionary<long, Player>();
 
@@ -241,7 +244,7 @@ namespace MiNET.Worlds
 
 		internal static McpeWrapper CreateMcpeBatch(byte[] bytes)
 		{
-			return BatchUtils.CreateBatchPacket(new Memory<byte>(bytes, 0, (int) bytes.Length), CompressionLevel.Optimal, true);
+			return BatchUtils.CreateBatchPacket(new Memory<byte>(bytes, 0, bytes.Length), CompressionLevel.Optimal, true);
 		}
 
 		private object _playerWriteLock = new object();
@@ -428,7 +431,7 @@ namespace MiNET.Worlds
 		{
 			if (type == MessageType.Chat || type == MessageType.Raw)
 			{
-				foreach (var line in text.Split(new string[] {"\n", Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
+				foreach (var line in text.Split(new[] {"\n", Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
 				{
 					McpeText message = McpeText.CreateObject();
 					message.type = (byte) type;
@@ -453,7 +456,7 @@ namespace MiNET.Worlds
 
 		private object _tickSync = new object();
 		private Stopwatch _tickTimer = new Stopwatch();
-		public long LastTickProcessingTime = 0;
+		public long LastTickProcessingTime;
 		public long AvarageTickProcessingTime = 50;
 		public int PlayerCount { get; private set; }
 
@@ -706,7 +709,7 @@ namespace MiNET.Worlds
 			var skyLight = GetSkyLight(coordinates) - amount;
 			var blockLight = GetBlockLight(coordinates);
 
-			return (int) Math.Max(skyLight, blockLight);
+			return Math.Max(skyLight, blockLight);
 		}
 
 		public int CalculateSkylightSubtracted(long worldTime)
@@ -724,7 +727,7 @@ namespace MiNET.Worlds
 		public float CalculateCelestialAngle(long worldTime)
 		{
 			int i = (int) (worldTime % 24000L);
-			float f = ((float) i) / 24000.0F - 0.25F;
+			float f = i / 24000.0F - 0.25F;
 
 			if (f < 0.0F)
 			{
@@ -736,7 +739,7 @@ namespace MiNET.Worlds
 				--f;
 			}
 
-			float f1 = 1.0F - (float) ((Math.Cos((double) f * Math.PI) + 1.0D) / 2.0D);
+			float f1 = 1.0F - (float) ((Math.Cos(f * Math.PI) + 1.0D) / 2.0D);
 			f = f + (f1 - f) / 3.0F;
 			return f;
 		}
@@ -1459,9 +1462,9 @@ namespace MiNET.Worlds
 			{
 				KnownPosition =
 				{
-					X = (float) coordinates.X + 0.5f,
-					Y = (float) coordinates.Y + 0.5f,
-					Z = (float) coordinates.Z + 0.5f
+					X = coordinates.X + 0.5f,
+					Y = coordinates.Y + 0.5f,
+					Z = coordinates.Z + 0.5f
 				},
 				Velocity = new Vector3((float) (random.NextDouble() * 0.005), (float) (random.NextDouble() * 0.20), (float) (random.NextDouble() * 0.005))
 			};

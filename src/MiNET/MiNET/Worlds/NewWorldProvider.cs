@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
 
 using MiNET.Blocks;
 using MiNET.Utils;
@@ -14,12 +12,12 @@ namespace MiNET.Worlds
 	{
 		public bool IsCaching { get; private set; }
 
-		private Generator.OctavesNoise minLimitPerlinNoise;
-		private Generator.OctavesNoise maxLimitPerlinNoise;
-		private Generator.OctavesNoise mainPerlinNoise;
-		private Generator.PerlinNoise surfaceNoise;
-		private Generator.OctavesNoise scaleNoise;
-		private Generator.OctavesNoise depthNoise;
+		private OctavesNoise minLimitPerlinNoise;
+		private OctavesNoise maxLimitPerlinNoise;
+		private OctavesNoise mainPerlinNoise;
+		private PerlinNoise surfaceNoise;
+		private OctavesNoise scaleNoise;
+		private OctavesNoise depthNoise;
 		private float[] biomeWeight;
 		private readonly ConcurrentDictionary<ChunkCoordinates, ChunkColumn> chunkCache = new ConcurrentDictionary<ChunkCoordinates, ChunkColumn>();
 		public long Seed { get; set; }
@@ -69,7 +67,7 @@ namespace MiNET.Worlds
 			SharedSeedRandom sharedSeedRandom = new SharedSeedRandom();
 			sharedSeedRandom.SetBaseChunkSeed(chunk.x, chunk.z);
 			SetBlocksInChunk(chunk.x, chunk.z, chunk);
-
+			//Biome[] abiome = biomeProvider.GetBiomeBlock(chunk.x * 16, chunk.z * 16)
 
 
 
@@ -155,10 +153,9 @@ namespace MiNET.Worlds
 			float coordinateScale = 684.412F;
 			float heightScale = 684.412F;
 			double[] adouble1 = this.mainPerlinNoise.Add(x, y, z, 5, 33, 5,
-				(double) (coordinateScale / 80.0F), (double) (heightScale / 160.0F), (double)
-				(coordinateScale / 80.0F));
-			double[] adouble2 = this.minLimitPerlinNoise.Add(x, y, z, 5, 33, 5, (double) coordinateScale, (double) heightScale, (double) coordinateScale);
-			double[] adouble3 = this.maxLimitPerlinNoise.Add(x, y, z, 5, 33, 5, (double) coordinateScale, (double) heightScale, (double) coordinateScale);
+				coordinateScale / 80.0F, heightScale / 160.0F, coordinateScale / 80.0F);
+			double[] adouble2 = this.minLimitPerlinNoise.Add(x, y, z, 5, 33, 5, coordinateScale, heightScale, coordinateScale);
+			double[] adouble3 = this.maxLimitPerlinNoise.Add(x, y, z, 5, 33, 5, coordinateScale, heightScale, coordinateScale);
 			int i = 0;
 			int j = 0;
 
@@ -220,15 +217,15 @@ namespace MiNET.Worlds
 					}
 
 					++j;
-					double d8 = (double) f3;
-					double d9 = (double) f2;
+					double d8 = f3;
+					double d9 = f2;
 					d8 = d8 + d7 * 0.2D;
 					d8 = d8 * 8.5D / 8.0D;
 					double d0 = 8.5D + d8 * 4.0D;
 
 					for (int l1 = 0; l1 < 33; ++l1)
 					{
-						double d1 = ((double) l1 - d0) * 12.0D * 128.0D / 256.0D / d9;
+						double d1 = (l1 - d0) * 12.0D * 128.0D / 256.0D / d9;
 						if (d1 < 0.0D)
 						{
 							d1 *= 4.0D;
@@ -240,7 +237,7 @@ namespace MiNET.Worlds
 						double d5 = MathHelper.ClampedLerp(d2, d3, d4) - d1;
 						if (l1 > 29)
 						{
-							double d6 = (double) ((float) (l1 - 29) / 3.0F);
+							double d6 = (l1 - 29) / 3.0F;
 							d5 = d5 * (1.0D - d6) - 10.0D * d6;
 						}
 

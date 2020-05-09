@@ -35,7 +35,7 @@ namespace MiNET.Worlds
 
 		public ChunkColumn GenerateChunkColumn(ChunkCoordinates chunkCoordinates)
 		{
-			return new ChunkColumn()
+			return new ChunkColumn
 			{
 				x = chunkCoordinates.X,
 				z = chunkCoordinates.Z

@@ -26,6 +26,7 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
+
 using fNbt;
 
 namespace MiNET.Worlds
@@ -77,7 +78,7 @@ namespace MiNET.Worlds
 				nbtTag = tag[LowercaseFirst(propertyInfo.Name)];
 			}
 
-			if (nbtTag == null) return default(T);
+			if (nbtTag == null) return default;
 
 			var mex = property.Body as MemberExpression;
 			var target = Expression.Lambda(mex.Expression).Compile().DynamicInvoke();
@@ -378,7 +379,7 @@ namespace MiNET.Worlds
 			}
 
 			if (nbtTag == null)
-				return default(T);
+				return default;
 
 			var mex = property.Body as MemberExpression;
 			var target = Expression.Lambda(mex.Expression).Compile().DynamicInvoke();

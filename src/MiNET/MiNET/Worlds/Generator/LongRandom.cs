@@ -52,7 +52,7 @@ namespace MiNET.Worlds.Generator
 		public void NextBytes(byte[] bytes)
 		{
 			for (int i = 0; i < bytes.Length;)
-			for (int rnd = NextInt(), n = System.Math.Min(bytes.Length - i, 4);
+			for (int rnd = NextInt(), n = Math.Min(bytes.Length - i, 4);
 				n-- > 0;
 				rnd >>= 8)
 				bytes[i++] = (byte) rnd;
@@ -90,7 +90,7 @@ namespace MiNET.Worlds.Generator
 				s = v1 * v1 + v2 * v2;
 			} while (s >= 1 || s == 0);
 
-			double multiplier = System.Math.Sqrt(-2 * System.Math.Log(s) / s);
+			double multiplier = Math.Sqrt(-2 * Math.Log(s) / s);
 			nextNextGaussian = v2 * multiplier;
 			haveNextNextGaussian = true;
 

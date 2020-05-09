@@ -44,7 +44,7 @@ namespace MiNET.Worlds.Structures
 		{
 			get
 			{
-				return new Block[]
+				return new[]
 				{
 					new Block(17) {Coordinates = new BlockCoordinates(0, 0, 0)},
 					new Block(17) {Coordinates = new BlockCoordinates(0, 1, 0)},
@@ -105,7 +105,7 @@ namespace MiNET.Worlds.Structures
 					new Block(18) {Coordinates = new BlockCoordinates(0, 6, 1)},
 					new Block(18) {Coordinates = new BlockCoordinates(0, 6, 0)},
 					new Block(18) {Coordinates = new BlockCoordinates(0, 6, -1)},
-					new Block(18) {Coordinates = new BlockCoordinates(1, 6, 0)},
+					new Block(18) {Coordinates = new BlockCoordinates(1, 6, 0)}
 				};
 			}
 		}

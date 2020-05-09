@@ -1,7 +1,5 @@
 ﻿//2020 1dndn
 
-using System;
-
 namespace MiNET.Worlds.Generator
 {
 	internal class OctavesNoise
