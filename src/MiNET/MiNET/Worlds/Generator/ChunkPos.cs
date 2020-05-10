@@ -1,7 +1,5 @@
 ﻿using System;
 
-using MiNET.Entities;
-
 namespace MiNET.Worlds.Generator
 {
 	class ChunkPos
@@ -41,22 +39,18 @@ namespace MiNET.Worlds.Generator
 		{
 			int i = 1664525 * X + 1013904223;
 			int j = 1664525 * (Z ^ -559038737) + 1013904223;
+
 			return i ^ j;
 		}
 
 		public new bool Equals(object other)
 		{
-			if (this == other)
-			{
-				return true;
-			}
-			else if (!(other is ChunkPos)) {
-				return false;
-			} else
-			{
-				ChunkPos chunkpos = (ChunkPos) other;
-				return X == chunkpos.X && Z == chunkpos.Z;
-			}
+			if (this == other) return true;
+
+			if (!(other is ChunkPos)) return false;
+			var chunkpos = (ChunkPos) other;
+
+			return X == chunkpos.X && Z == chunkpos.Z;
 		}
 
 		public int GetXStart()

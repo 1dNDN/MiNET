@@ -48,8 +48,8 @@ namespace MiNET.Worlds.Generator
 				double d1 = xOffset * d0 * xScale;
 				double d2 = yOffset * d0 * yScale;
 				double d3 = zOffset * d0 * zScale;
-				long j = (long)d1;
-				long k = (long)d3;
+				long j = (long) d1;
+				long k = (long) d3;
 				d1 = d1 - j;
 				d3 = d3 - k;
 				j = j % 16777216L;

@@ -43,45 +43,65 @@ namespace MiNET.Worlds
 		}
 
 		public int Version { get; set; }
+
 		public bool Initialized { get; set; }
+
 		public string LevelName { get; set; }
+
 		public string GeneratorName { get; set; }
+
 		public int GeneratorVersion { get; set; }
+
 		public string GeneratorOptions { get; set; }
+
 		public long RandomSeed { get; set; }
+
 		public bool MapFeatures { get; set; }
+
 		public long LastPlayed { get; set; }
+
 		public bool AllowCommands { get; set; }
+
 		public bool Hardcore { get; set; }
+
 		public int GameType { get; set; }
+
 		public long Time { get; set; }
+
 		public long DayTime { get; set; }
+
 		public int SpawnX { get; set; }
+
 		public int SpawnY { get; set; }
+
 		public int SpawnZ { get; set; }
+
 		public bool Raining { get; set; }
+
 		public int RainTime { get; set; }
+
 		public bool Thundering { get; set; }
+
 		public int ThunderTime { get; set; }
+
+		public object Clone()
+		{
+			return MemberwiseClone();
+		}
 
 		public T GetPropertyValue<T>(NbtTag tag, Expression<Func<T>> property)
 		{
 			var propertyInfo = ((MemberExpression) property.Body).Member as PropertyInfo;
-			if (propertyInfo == null)
-			{
-				throw new ArgumentException("The lambda expression 'property' should point to a valid Property");
-			}
+
+			if (propertyInfo == null) throw new ArgumentException("The lambda expression 'property' should point to a valid Property");
 
 			NbtTag nbtTag = tag[propertyInfo.Name];
-			if (nbtTag == null)
-			{
-				nbtTag = tag[LowercaseFirst(propertyInfo.Name)];
-			}
+			if (nbtTag == null) nbtTag = tag[LowercaseFirst(propertyInfo.Name)];
 
 			if (nbtTag == null) return default;
 
 			var mex = property.Body as MemberExpression;
-			var target = Expression.Lambda(mex.Expression).Compile().DynamicInvoke();
+			object target = Expression.Lambda(mex.Expression).Compile().DynamicInvoke();
 
 			switch (nbtTag.TagType)
 			{
@@ -90,30 +110,42 @@ namespace MiNET.Worlds
 				case NbtTagType.End:
 					break;
 				case NbtTagType.Byte:
-					if (propertyInfo.PropertyType == typeof(bool)) propertyInfo.SetValue(target, nbtTag.ByteValue == 1);
-					else propertyInfo.SetValue(target, nbtTag.ByteValue);
+					if (propertyInfo.PropertyType == typeof(bool))
+						propertyInfo.SetValue(target, nbtTag.ByteValue == 1);
+					else
+						propertyInfo.SetValue(target, nbtTag.ByteValue);
+
 					break;
 				case NbtTagType.Short:
 					propertyInfo.SetValue(target, nbtTag.ShortValue);
+
 					break;
 				case NbtTagType.Int:
-					if (propertyInfo.PropertyType == typeof(bool)) propertyInfo.SetValue(target, nbtTag.IntValue == 1);
-					else propertyInfo.SetValue(target, nbtTag.IntValue);
+					if (propertyInfo.PropertyType == typeof(bool))
+						propertyInfo.SetValue(target, nbtTag.IntValue == 1);
+					else
+						propertyInfo.SetValue(target, nbtTag.IntValue);
+
 					break;
 				case NbtTagType.Long:
 					propertyInfo.SetValue(target, nbtTag.LongValue);
+
 					break;
 				case NbtTagType.Float:
 					propertyInfo.SetValue(target, nbtTag.FloatValue);
+
 					break;
 				case NbtTagType.Double:
 					propertyInfo.SetValue(target, nbtTag.DoubleValue);
+
 					break;
 				case NbtTagType.ByteArray:
 					propertyInfo.SetValue(target, nbtTag.ByteArrayValue);
+
 					break;
 				case NbtTagType.String:
 					propertyInfo.SetValue(target, nbtTag.StringValue);
+
 					break;
 				case NbtTagType.List:
 					break;
@@ -121,6 +153,7 @@ namespace MiNET.Worlds
 					break;
 				case NbtTagType.IntArray:
 					propertyInfo.SetValue(target, nbtTag.IntArrayValue);
+
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
@@ -132,59 +165,36 @@ namespace MiNET.Worlds
 		public void SetPropertyValue<T>(NbtTag tag, Expression<Func<T>> property, bool upperFirst = true)
 		{
 			var propertyInfo = ((MemberExpression) property.Body).Member as PropertyInfo;
-			if (propertyInfo == null)
-			{
-				throw new ArgumentException("The lambda expression 'property' should point to a valid Property");
-			}
+
+			if (propertyInfo == null) throw new ArgumentException("The lambda expression 'property' should point to a valid Property");
 
 			NbtTag nbtTag = tag[propertyInfo.Name];
-			if (nbtTag == null)
-			{
-				nbtTag = tag[LowercaseFirst(propertyInfo.Name)];
-			}
+			if (nbtTag == null) nbtTag = tag[LowercaseFirst(propertyInfo.Name)];
 
 			if (nbtTag == null)
 			{
 				if (propertyInfo.PropertyType == typeof(bool))
-				{
 					nbtTag = new NbtByte(propertyInfo.Name);
-				}
 				else if (propertyInfo.PropertyType == typeof(byte))
-				{
 					nbtTag = new NbtByte(LowercaseFirst(propertyInfo.Name));
-				}
 				else if (propertyInfo.PropertyType == typeof(short))
-				{
 					nbtTag = new NbtShort(LowercaseFirst(propertyInfo.Name));
-				}
 				else if (propertyInfo.PropertyType == typeof(int))
-				{
 					nbtTag = new NbtInt(LowercaseFirst(propertyInfo.Name));
-				}
 				else if (propertyInfo.PropertyType == typeof(long))
-				{
 					nbtTag = new NbtLong(LowercaseFirst(propertyInfo.Name));
-				}
 				else if (propertyInfo.PropertyType == typeof(float))
-				{
 					nbtTag = new NbtFloat(LowercaseFirst(propertyInfo.Name));
-				}
 				else if (propertyInfo.PropertyType == typeof(double))
-				{
 					nbtTag = new NbtDouble(LowercaseFirst(propertyInfo.Name));
-				}
 				else if (propertyInfo.PropertyType == typeof(string))
-				{
 					nbtTag = new NbtString(LowercaseFirst(propertyInfo.Name), "");
-				}
 				else
-				{
 					return;
-				}
 			}
 
 			var mex = property.Body as MemberExpression;
-			var target = Expression.Lambda(mex.Expression).Compile().DynamicInvoke();
+			object target = Expression.Lambda(mex.Expression).Compile().DynamicInvoke();
 
 			switch (nbtTag.TagType)
 			{
@@ -197,30 +207,38 @@ namespace MiNET.Worlds
 						tag[nbtTag.Name] = new NbtByte(nbtTag.Name, (byte) ((bool) propertyInfo.GetValue(target) ? 1 : 0));
 					else
 						tag[nbtTag.Name] = new NbtByte(nbtTag.Name, (byte) propertyInfo.GetValue(target));
+
 					break;
 				case NbtTagType.Short:
 					tag[nbtTag.Name] = new NbtShort(nbtTag.Name, (short) propertyInfo.GetValue(target));
+
 					break;
 				case NbtTagType.Int:
 					if (propertyInfo.PropertyType == typeof(bool))
 						tag[nbtTag.Name] = new NbtInt(nbtTag.Name, (bool) propertyInfo.GetValue(target) ? 1 : 0);
 					else
 						tag[nbtTag.Name] = new NbtInt(nbtTag.Name, (int) propertyInfo.GetValue(target));
+
 					break;
 				case NbtTagType.Long:
 					tag[nbtTag.Name] = new NbtLong(nbtTag.Name, (long) propertyInfo.GetValue(target));
+
 					break;
 				case NbtTagType.Float:
 					tag[nbtTag.Name] = new NbtFloat(nbtTag.Name, (float) propertyInfo.GetValue(target));
+
 					break;
 				case NbtTagType.Double:
 					tag[nbtTag.Name] = new NbtDouble(nbtTag.Name, (double) propertyInfo.GetValue(target));
+
 					break;
 				case NbtTagType.ByteArray:
 					tag[nbtTag.Name] = new NbtByteArray(nbtTag.Name, (byte[]) propertyInfo.GetValue(target));
+
 					break;
 				case NbtTagType.String:
 					tag[nbtTag.Name] = new NbtString(nbtTag.Name, (string) propertyInfo.GetValue(target) ?? "");
+
 					break;
 				case NbtTagType.List:
 					break;
@@ -228,6 +246,7 @@ namespace MiNET.Worlds
 					break;
 				case NbtTagType.IntArray:
 					tag[nbtTag.Name] = new NbtIntArray(nbtTag.Name, (int[]) propertyInfo.GetValue(target));
+
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
@@ -240,10 +259,8 @@ namespace MiNET.Worlds
 		private static string LowercaseFirst(string s)
 		{
 			// Check for empty string.
-			if (string.IsNullOrEmpty(s))
-			{
-				return string.Empty;
-			}
+			if (string.IsNullOrEmpty(s)) return string.Empty;
+
 			// Return char and concat substring.
 			return char.ToLower(s[0]) + s.Substring(1);
 		}
@@ -297,11 +314,6 @@ namespace MiNET.Worlds
 			SetPropertyValue(dataTag, () => Thundering);
 			SetPropertyValue(dataTag, () => ThunderTime);
 		}
-
-		public object Clone()
-		{
-			return MemberwiseClone();
-		}
 	}
 
 	public class LevelInfoBedrock : ICloneable
@@ -316,18 +328,35 @@ namespace MiNET.Worlds
 		}
 
 		public int Dimension { get; set; }
+
 		public int GameType { get; set; }
+
 		public string Generator { get; set; }
+
 		public long LastPlayed { get; set; }
+
 		public string LevelName { get; set; }
+
 		public string Platform { get; set; }
+
 		public long RandomSeed { get; set; }
+
 		public int SpawnX { get; set; }
+
 		public int SpawnY { get; set; }
+
 		public int SpawnZ { get; set; }
+
 		public long Time { get; set; }
+
 		public long DayCycleStopTime { get; set; }
+
 		public long SpawnMobs { get; set; }
+
+		public object Clone()
+		{
+			return MemberwiseClone();
+		}
 
 
 		public void LoadFromNbt(NbtTag dataTag)
@@ -367,22 +396,16 @@ namespace MiNET.Worlds
 		public T GetPropertyValue<T>(NbtTag tag, Expression<Func<T>> property)
 		{
 			var propertyInfo = ((MemberExpression) property.Body).Member as PropertyInfo;
-			if (propertyInfo == null)
-			{
-				throw new ArgumentException("The lambda expression 'property' should point to a valid Property");
-			}
+
+			if (propertyInfo == null) throw new ArgumentException("The lambda expression 'property' should point to a valid Property");
 
 			NbtTag nbtTag = tag[propertyInfo.Name];
-			if (nbtTag == null)
-			{
-				nbtTag = tag[LowercaseFirst(propertyInfo.Name)];
-			}
+			if (nbtTag == null) nbtTag = tag[LowercaseFirst(propertyInfo.Name)];
 
-			if (nbtTag == null)
-				return default;
+			if (nbtTag == null) return default;
 
 			var mex = property.Body as MemberExpression;
-			var target = Expression.Lambda(mex.Expression).Compile().DynamicInvoke();
+			object target = Expression.Lambda(mex.Expression).Compile().DynamicInvoke();
 
 			switch (nbtTag.TagType)
 			{
@@ -395,30 +418,38 @@ namespace MiNET.Worlds
 						propertyInfo.SetValue(target, nbtTag.ByteValue == 1);
 					else
 						propertyInfo.SetValue(target, nbtTag.ByteValue);
+
 					break;
 				case NbtTagType.Short:
 					propertyInfo.SetValue(target, nbtTag.ShortValue);
+
 					break;
 				case NbtTagType.Int:
 					if (propertyInfo.PropertyType == typeof(bool))
 						propertyInfo.SetValue(target, nbtTag.IntValue == 1);
 					else
 						propertyInfo.SetValue(target, nbtTag.IntValue);
+
 					break;
 				case NbtTagType.Long:
 					propertyInfo.SetValue(target, nbtTag.LongValue);
+
 					break;
 				case NbtTagType.Float:
 					propertyInfo.SetValue(target, nbtTag.FloatValue);
+
 					break;
 				case NbtTagType.Double:
 					propertyInfo.SetValue(target, nbtTag.DoubleValue);
+
 					break;
 				case NbtTagType.ByteArray:
 					propertyInfo.SetValue(target, nbtTag.ByteArrayValue);
+
 					break;
 				case NbtTagType.String:
 					propertyInfo.SetValue(target, nbtTag.StringValue);
+
 					break;
 				case NbtTagType.List:
 					break;
@@ -426,6 +457,7 @@ namespace MiNET.Worlds
 					break;
 				case NbtTagType.IntArray:
 					propertyInfo.SetValue(target, nbtTag.IntArrayValue);
+
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
@@ -437,59 +469,36 @@ namespace MiNET.Worlds
 		public void SetPropertyValue<T>(NbtTag tag, Expression<Func<T>> property, bool upperFirst = true)
 		{
 			var propertyInfo = ((MemberExpression) property.Body).Member as PropertyInfo;
-			if (propertyInfo == null)
-			{
-				throw new ArgumentException("The lambda expression 'property' should point to a valid Property");
-			}
+
+			if (propertyInfo == null) throw new ArgumentException("The lambda expression 'property' should point to a valid Property");
 
 			NbtTag nbtTag = tag[propertyInfo.Name];
-			if (nbtTag == null)
-			{
-				nbtTag = tag[LowercaseFirst(propertyInfo.Name)];
-			}
+			if (nbtTag == null) nbtTag = tag[LowercaseFirst(propertyInfo.Name)];
 
 			if (nbtTag == null)
 			{
 				if (propertyInfo.PropertyType == typeof(bool))
-				{
 					nbtTag = new NbtByte(propertyInfo.Name);
-				}
 				else if (propertyInfo.PropertyType == typeof(byte))
-				{
 					nbtTag = new NbtByte(LowercaseFirst(propertyInfo.Name));
-				}
 				else if (propertyInfo.PropertyType == typeof(short))
-				{
 					nbtTag = new NbtShort(LowercaseFirst(propertyInfo.Name));
-				}
 				else if (propertyInfo.PropertyType == typeof(int))
-				{
 					nbtTag = new NbtInt(LowercaseFirst(propertyInfo.Name));
-				}
 				else if (propertyInfo.PropertyType == typeof(long))
-				{
 					nbtTag = new NbtLong(LowercaseFirst(propertyInfo.Name));
-				}
 				else if (propertyInfo.PropertyType == typeof(float))
-				{
 					nbtTag = new NbtFloat(LowercaseFirst(propertyInfo.Name));
-				}
 				else if (propertyInfo.PropertyType == typeof(double))
-				{
 					nbtTag = new NbtDouble(LowercaseFirst(propertyInfo.Name));
-				}
 				else if (propertyInfo.PropertyType == typeof(string))
-				{
 					nbtTag = new NbtString(LowercaseFirst(propertyInfo.Name), "");
-				}
 				else
-				{
 					return;
-				}
 			}
 
 			var mex = property.Body as MemberExpression;
-			var target = Expression.Lambda(mex.Expression).Compile().DynamicInvoke();
+			object target = Expression.Lambda(mex.Expression).Compile().DynamicInvoke();
 
 			switch (nbtTag.TagType)
 			{
@@ -502,30 +511,38 @@ namespace MiNET.Worlds
 						tag[nbtTag.Name] = new NbtByte(nbtTag.Name, (byte) ((bool) propertyInfo.GetValue(target) ? 1 : 0));
 					else
 						tag[nbtTag.Name] = new NbtByte(nbtTag.Name, (byte) propertyInfo.GetValue(target));
+
 					break;
 				case NbtTagType.Short:
 					tag[nbtTag.Name] = new NbtShort(nbtTag.Name, (short) propertyInfo.GetValue(target));
+
 					break;
 				case NbtTagType.Int:
 					if (propertyInfo.PropertyType == typeof(bool))
 						tag[nbtTag.Name] = new NbtInt(nbtTag.Name, (bool) propertyInfo.GetValue(target) ? 1 : 0);
 					else
 						tag[nbtTag.Name] = new NbtInt(nbtTag.Name, (int) propertyInfo.GetValue(target));
+
 					break;
 				case NbtTagType.Long:
 					tag[nbtTag.Name] = new NbtLong(nbtTag.Name, (long) propertyInfo.GetValue(target));
+
 					break;
 				case NbtTagType.Float:
 					tag[nbtTag.Name] = new NbtFloat(nbtTag.Name, (float) propertyInfo.GetValue(target));
+
 					break;
 				case NbtTagType.Double:
 					tag[nbtTag.Name] = new NbtDouble(nbtTag.Name, (double) propertyInfo.GetValue(target));
+
 					break;
 				case NbtTagType.ByteArray:
 					tag[nbtTag.Name] = new NbtByteArray(nbtTag.Name, (byte[]) propertyInfo.GetValue(target));
+
 					break;
 				case NbtTagType.String:
 					tag[nbtTag.Name] = new NbtString(nbtTag.Name, (string) propertyInfo.GetValue(target) ?? "");
+
 					break;
 				case NbtTagType.List:
 					break;
@@ -533,6 +550,7 @@ namespace MiNET.Worlds
 					break;
 				case NbtTagType.IntArray:
 					tag[nbtTag.Name] = new NbtIntArray(nbtTag.Name, (int[]) propertyInfo.GetValue(target));
+
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
@@ -545,17 +563,10 @@ namespace MiNET.Worlds
 		private static string LowercaseFirst(string s)
 		{
 			// Check for empty string.
-			if (string.IsNullOrEmpty(s))
-			{
-				return string.Empty;
-			}
+			if (string.IsNullOrEmpty(s)) return string.Empty;
+
 			// Return char and concat substring.
 			return char.ToLower(s[0]) + s.Substring(1);
-		}
-
-		public object Clone()
-		{
-			return MemberwiseClone();
 		}
 	}
 }

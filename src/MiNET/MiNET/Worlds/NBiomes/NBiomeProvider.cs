@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 
 using MiNET.Worlds.Generator;
 
@@ -12,7 +8,8 @@ namespace MiNET.Worlds.NBiomes
 	{
 		public void Tick() { }
 
-		[CanBeNull] public abstract NBiome GetBiome(BlockPos pos, [CanBeNull] NBiome defaultBiome);
+		[CanBeNull]
+		public abstract NBiome GetBiome(BlockPos pos, [CanBeNull] NBiome defaultBiome);
 
 		public abstract NBiome[] GetBiomes(
 			int startX,

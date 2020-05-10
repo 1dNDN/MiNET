@@ -38,13 +38,17 @@ namespace MiNET.Worlds
 		ChunkColumn GenerateChunkColumn(ChunkCoordinates chunkCoordinates, bool cacheOnly = false);
 
 		Vector3 GetSpawnPoint();
+
 		string GetName();
 
 		long GetTime();
+
 		long GetDayTime();
 
 		int SaveChunks();
+
 		bool HaveNether();
+
 		bool HaveTheEnd();
 	}
 

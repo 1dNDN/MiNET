@@ -4,16 +4,6 @@ namespace MiNET.Worlds.Generator
 {
 	class MathHelper
 	{
-		public static double ClampedLerp(double lowerBnd, double upperBnd, double slide)
-		{
-			if (slide < 0.0D)
-			{
-				return lowerBnd;
-			}
-
-			return slide > 1.0D ? upperBnd : lowerBnd + (upperBnd - lowerBnd) * slide;
-		}
-
 		private static int[] MULTIPLY_DE_BRUIJN_BIT_POSITION =
 		{
 			0,
@@ -50,6 +40,13 @@ namespace MiNET.Worlds.Generator
 			9
 		};
 
+		public static double ClampedLerp(double lowerBnd, double upperBnd, double slide)
+		{
+			if (slide < 0.0D) return lowerBnd;
+
+			return slide > 1.0D ? upperBnd : lowerBnd + (upperBnd - lowerBnd) * slide;
+		}
+
 		public static int SmallestEncompassingPowerOfTwo(int value)
 		{
 			int i = value - 1;
@@ -71,7 +68,7 @@ namespace MiNET.Worlds.Generator
 		{
 			value = IsPowerOfTwo(value) ? value : SmallestEncompassingPowerOfTwo(value);
 
-			return MULTIPLY_DE_BRUIJN_BIT_POSITION[(int) ((long) value * 125613361L >> 27) & 31];
+			return MULTIPLY_DE_BRUIJN_BIT_POSITION[(int) (value * 125613361L >> 27) & 31];
 		}
 
 		public static int Log2(int value)
@@ -81,33 +78,19 @@ namespace MiNET.Worlds.Generator
 
 		public static int RoundUp(int number, int interval)
 		{
-			if (interval == 0)
-			{
-				return 0;
-			}
-			else if (number == 0)
-			{
-				return interval;
-			}
-			else
-			{
-				if (number < 0)
-				{
-					interval *= -1;
-				}
+			if (interval == 0) return 0;
 
-				int i = number % interval;
+			if (number == 0) return interval;
+			if (number < 0) interval *= -1;
 
-				return i == 0 ? number : number + interval - i;
-			}
+			int i = number % interval;
+
+			return i == 0 ? number : number + interval - i;
 		}
 
 		public static void InclusiveBetween(long start, long end, long value)
 		{
-			if (value < start || value > end)
-			{
-				throw new Exception();
-			}
+			if (value < start || value > end) throw new Exception();
 		}
 	}
 }

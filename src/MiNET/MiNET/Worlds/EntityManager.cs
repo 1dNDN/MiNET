@@ -39,10 +39,7 @@ namespace MiNET.Worlds
 
 		public long AddEntity(Entity entity)
 		{
-			if (entity.EntityId == EntityIdUndefined)
-			{
-				entity.EntityId = Interlocked.Increment(ref _entityId);
-			}
+			if (entity.EntityId == EntityIdUndefined) entity.EntityId = Interlocked.Increment(ref _entityId);
 
 			return entity.EntityId;
 		}

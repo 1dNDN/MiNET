@@ -46,10 +46,10 @@ namespace MiNET.Worlds
 {
 	public class SkyLightBlockAccess : IBlockAccess
 	{
-		private readonly IWorldProvider _worldProvider;
-		private readonly int _heightForUnloadedChunk;
-		private readonly ChunkCoordinates _coord = ChunkCoordinates.None;
 		private readonly ChunkColumn _chunk;
+		private readonly ChunkCoordinates _coord = ChunkCoordinates.None;
+		private readonly int _heightForUnloadedChunk;
+		private readonly IWorldProvider _worldProvider;
 
 		public SkyLightBlockAccess(IWorldProvider worldProvider, int heightForUnloadedChunk = 255)
 		{
@@ -83,6 +83,7 @@ namespace MiNET.Worlds
 											if (coordinates != _coord + ChunkCoordinates.Forward + ChunkCoordinates.Left)
 												if (coordinates != _coord + ChunkCoordinates.Forward + ChunkCoordinates.Right)
 													return null;
+
 			return _worldProvider.GenerateChunkColumn(coordinates, true);
 		}
 
@@ -95,6 +96,7 @@ namespace MiNET.Worlds
 		public int GetHeight(BlockCoordinates coordinates)
 		{
 			ChunkColumn chunk = GetChunk(coordinates, true);
+
 			if (chunk == null) return _heightForUnloadedChunk;
 
 			return chunk.GetHeight(coordinates.X & 0x0f, coordinates.Z & 0x0f);
@@ -105,11 +107,24 @@ namespace MiNET.Worlds
 			return null;
 		}
 
-		public void SetBlock(int x, int y, int z, int blockId, int metadata = 0, bool broadcast = true, bool applyPhysics = true, bool calculateLight = true)
+		public void SetBlock(
+			Block block,
+			bool broadcast = true,
+			bool applyPhysics = true,
+			bool calculateLight = true,
+			ChunkColumn possibleChunk = null)
 		{
 		}
 
-		public void SetBlock(Block block, bool broadcast = true, bool applyPhysics = true, bool calculateLight = true, ChunkColumn possibleChunk = null)
+		public void SetBlock(
+			int x,
+			int y,
+			int z,
+			int blockId,
+			int metadata = 0,
+			bool broadcast = true,
+			bool applyPhysics = true,
+			bool calculateLight = true)
 		{
 		}
 	}
@@ -117,12 +132,9 @@ namespace MiNET.Worlds
 	public class SkyLightCalculations
 	{
 		private static readonly ILog Log = LogManager.GetLogger(typeof(SkyLightCalculations));
+		private static int _chunkCount;
 
-		// Debug tracking, don't enable unless you really need to "see it".
-
-		public bool TrackResults { get; }
-		public ConcurrentDictionary<BlockCoordinates, int> Visits { get; } = new ConcurrentDictionary<BlockCoordinates, int>();
-		public long StartTimeInMilliseconds { get; set; }
+		private object _imageSync = new object();
 
 		ConcurrentDictionary<ChunkColumn, bool> _visitedColumns = new ConcurrentDictionary<ChunkColumn, bool>();
 
@@ -133,10 +145,20 @@ namespace MiNET.Worlds
 			TrackResults = trackResults;
 		}
 
+		// Debug tracking, don't enable unless you really need to "see it".
+
+		public bool TrackResults { get; }
+
+		public ConcurrentDictionary<BlockCoordinates, int> Visits { get; } = new ConcurrentDictionary<BlockCoordinates, int>();
+
+		public long StartTimeInMilliseconds { get; set; }
+
+		public List<Task<Bitmap>> RenderingTasks { get; } = new List<Task<Bitmap>>();
+
 		public static void Calculate(Level level)
 		{
-			var chunks = level.GetLoadedChunks().OrderBy(column => column.x).ThenBy(column => column.z);
-			SkyLightBlockAccess blockAccess = new SkyLightBlockAccess(level.WorldProvider);
+			IOrderedEnumerable<ChunkColumn> chunks = level.GetLoadedChunks().OrderBy(column => column.x).ThenBy(column => column.z);
+			var blockAccess = new SkyLightBlockAccess(level.WorldProvider);
 
 			_chunkCount = chunks.Count();
 
@@ -144,14 +166,14 @@ namespace MiNET.Worlds
 
 			CheckIfSpawnIsMiddle(chunks, level.SpawnPoint.GetCoordinates3D());
 
-			Stopwatch sw = new Stopwatch();
+			var sw = new Stopwatch();
 			sw.Start();
 
 			//Parallel.ForEach(chunks, chunk => chunk.RecalcHeight());
 
 			//Log.Debug($"Recalc height level {level.LevelName}({level.LevelId}) for {_chunkCount} chunks, {_chunkCount*16*16*256} blocks. Time {sw.ElapsedMilliseconds}ms");
 
-			SkyLightCalculations calculator = new SkyLightCalculations(Config.GetProperty("CalculateLights.MakeMovie", false));
+			var calculator = new SkyLightCalculations(Config.GetProperty("CalculateLights.MakeMovie", false));
 
 			int midX = calculator.GetMidX(chunks.ToArray());
 			//int width = calculator.GetWidth(chunks.ToArray());
@@ -165,37 +187,37 @@ namespace MiNET.Worlds
 
 			var t0 = Task.Run(() =>
 			{
-				var pairs = chunks.OrderBy(pair => pair.x).ThenBy(pair => pair.z).Where(chunk => chunk.x <= midX).OrderByDescending(pair => pair.x).ThenBy(pair => pair.z).ToArray();
+				ChunkColumn[] pairs = chunks.OrderBy(pair => pair.x).ThenBy(pair => pair.z).Where(chunk => chunk.x <= midX).OrderByDescending(pair => pair.x).ThenBy(pair => pair.z).ToArray();
 				calculator.CalculateSkyLights(blockAccess, pairs);
 			});
 
 			var t5 = Task.Run(() =>
 			{
-				var pairs = chunks.OrderByDescending(pair => pair.x).ThenBy(pair => pair.z).Where(chunk => chunk.x > midX).OrderBy(pair => pair.x).ThenByDescending(pair => pair.z).ToArray();
+				ChunkColumn[] pairs = chunks.OrderByDescending(pair => pair.x).ThenBy(pair => pair.z).Where(chunk => chunk.x > midX).OrderBy(pair => pair.x).ThenByDescending(pair => pair.z).ToArray();
 				calculator.CalculateSkyLights(blockAccess, pairs);
 			});
 
 			var t1 = Task.Run(() =>
 			{
-				var pairs = chunks.OrderBy(pair => pair.x).ThenBy(pair => pair.z).ToArray();
+				ChunkColumn[] pairs = chunks.OrderBy(pair => pair.x).ThenBy(pair => pair.z).ToArray();
 				calculator.CalculateSkyLights(blockAccess, pairs);
 			});
 
 			var t2 = Task.Run(() =>
 			{
-				var pairs = chunks.OrderByDescending(pair => pair.x).ThenByDescending(pair => pair.z).ToArray();
+				ChunkColumn[] pairs = chunks.OrderByDescending(pair => pair.x).ThenByDescending(pair => pair.z).ToArray();
 				calculator.CalculateSkyLights(blockAccess, pairs);
 			});
 
 			var t3 = Task.Run(() =>
 			{
-				var pairs = chunks.OrderByDescending(pair => pair.x).ThenBy(pair => pair.z).ToArray();
+				ChunkColumn[] pairs = chunks.OrderByDescending(pair => pair.x).ThenBy(pair => pair.z).ToArray();
 				calculator.CalculateSkyLights(blockAccess, pairs);
 			});
 
 			var t4 = Task.Run(() =>
 			{
-				var pairs = chunks.OrderBy(pair => pair.x).ThenByDescending(pair => pair.z).ToArray();
+				ChunkColumn[] pairs = chunks.OrderBy(pair => pair.x).ThenByDescending(pair => pair.z).ToArray();
 				calculator.CalculateSkyLights(blockAccess, pairs);
 			});
 
@@ -204,7 +226,6 @@ namespace MiNET.Worlds
 			Log.Debug($"Recalc skylight for {_chunkCount:N0} chunks, {_chunkCount * 16 * 16 * 256:N0} blocks. Touches={calculator.visits:N0} Time {sw.ElapsedMilliseconds:N0}ms");
 
 			if (calculator.TrackResults)
-			{
 				Task.Run(() =>
 				{
 					tickerHighPrecisionTimer?.Dispose();
@@ -214,7 +235,7 @@ namespace MiNET.Worlds
 					if (calculator.RenderingTasks.Count == 0) return;
 
 					// Start with an end-frame (twitter thumbs)
-					var last = calculator.RenderingTasks.Last();
+					Task<Bitmap> last = calculator.RenderingTasks.Last();
 					calculator.RenderingTasks.Remove(last);
 					calculator.RenderingTasks.Insert(0, last);
 
@@ -222,7 +243,6 @@ namespace MiNET.Worlds
 
 					Log.Debug("Movie rendered.");
 				});
-			}
 
 			//foreach (var chunk in chunks)
 			//{
@@ -240,16 +260,17 @@ namespace MiNET.Worlds
 		public int CalculateSkyLights(IBlockAccess level, ChunkColumn[] chunks)
 		{
 			int calcCount = 0;
-			Stopwatch calcTime = new Stopwatch();
+			var calcTime = new Stopwatch();
 			int lastCount = 0;
 
-			foreach (var chunk in chunks)
+			foreach (ChunkColumn chunk in chunks)
 			{
 				if (!_visitedColumns.TryAdd(chunk, true)) continue;
 
 				if (chunk.isAllAir) continue;
 
 				calcTime.Restart();
+
 				if (RecalcSkyLight(chunk, level))
 				{
 					//calcCount++;
@@ -273,36 +294,30 @@ namespace MiNET.Worlds
 
 			var lightBfQueue = new Queue<BlockCoordinates>();
 			var lightBfSet = new HashSet<BlockCoordinates>();
+
 			for (int x = 0; x < 16; x++)
+			for (int z = 0; z < 16; z++)
 			{
-				for (int z = 0; z < 16; z++)
+				if (chunk.isAllAir && !IsOnChunkBorder(x, z)) continue;
+
+				int height = GetHigestSurrounding(x, z, chunk, level);
+
+				if (height == 0) continue;
+
+				//var skyLight = chunk.GetSkylight(x, height, z);
+				//if (skyLight == 15)
 				{
-					if (chunk.isAllAir && !IsOnChunkBorder(x, z))
-					{
-						continue;
-					}
-
-					int height = GetHigestSurrounding(x, z, chunk, level);
-					if (height == 0)
-					{
-						continue;
-					}
-
-					//var skyLight = chunk.GetSkylight(x, height, z);
-					//if (skyLight == 15)
-					{
-						//Block block = level.GetBlock(new BlockCoordinates(x + (chunk.x*16), height, z + (chunk.z*16)), chunk);
-						//Calculate(level, block);
-						//Calculate(level, new BlockCoordinates(x + (chunk.x*16), height, z + (chunk.z*16)), lightBfQueue);
-						var coordinates = new BlockCoordinates(x + (chunk.x * 16), height, z + (chunk.z * 16));
-						lightBfQueue.Enqueue(coordinates);
-						lightBfSet.Add(coordinates);
-					}
-					//else
-					//{
-					//	Log.Error($"Block with wrong light level. Expected 15 but was {skyLight}");
-					//}
+					//Block block = level.GetBlock(new BlockCoordinates(x + (chunk.x*16), height, z + (chunk.z*16)), chunk);
+					//Calculate(level, block);
+					//Calculate(level, new BlockCoordinates(x + (chunk.x*16), height, z + (chunk.z*16)), lightBfQueue);
+					var coordinates = new BlockCoordinates(x + (chunk.x * 16), height, z + (chunk.z * 16));
+					lightBfQueue.Enqueue(coordinates);
+					lightBfSet.Add(coordinates);
 				}
+				//else
+				//{
+				//	Log.Error($"Block with wrong light level. Expected 15 but was {skyLight}");
+				//}
 			}
 
 			Calculate(level, lightBfQueue, lightBfSet);
@@ -314,45 +329,39 @@ namespace MiNET.Worlds
 		{
 			int currentLight = level.GetSkyLight(coordinates);
 
-			var chunk = level.GetChunk(coordinates);
-			var height = chunk.GetRecalatedHeight(coordinates.X & 0x0f, coordinates.Z & 0x0f);
+			ChunkColumn chunk = level.GetChunk(coordinates);
+			int height = chunk.GetRecalatedHeight(coordinates.X & 0x0f, coordinates.Z & 0x0f);
 
-			Queue<BlockCoordinates> sourceQueue = new Queue<BlockCoordinates>();
+			var sourceQueue = new Queue<BlockCoordinates>();
 			sourceQueue.Enqueue(coordinates);
+
 			if (currentLight != 0)
 			{
-				Queue<BlockCoordinates> resetQueue = new Queue<BlockCoordinates>();
-				HashSet<BlockCoordinates> visits = new HashSet<BlockCoordinates>();
+				var resetQueue = new Queue<BlockCoordinates>();
+				var visits = new HashSet<BlockCoordinates>();
 
 				// Reset all lights that potentially derive from this
 				resetQueue.Enqueue(coordinates);
 
-				Queue<BlockCoordinates> deleteQueue = new Queue<BlockCoordinates>();
+				var deleteQueue = new Queue<BlockCoordinates>();
+
 				while (resetQueue.Count > 0)
 				{
-					var coord = resetQueue.Dequeue();
-					if (visits.Contains(coord))
-					{
-						continue;
-					}
+					BlockCoordinates coord = resetQueue.Dequeue();
+
+					if (visits.Contains(coord)) continue;
 
 					visits.Add(coord);
 
 					if (coord.DistanceTo(coordinates) > 16) continue;
 
 					ResetLight(level, resetQueue, sourceQueue, coord);
-					if (!sourceQueue.Contains(coord))
-					{
-						deleteQueue.Enqueue(coord);
-					}
+					if (!sourceQueue.Contains(coord)) deleteQueue.Enqueue(coord);
 				}
 
 				level.SetSkyLight(coordinates, 0);
 
-				foreach (var delete in deleteQueue)
-				{
-					level.SetSkyLight(delete, 0);
-				}
+				foreach (BlockCoordinates delete in deleteQueue) level.SetSkyLight(delete, 0);
 			}
 			else
 			{
@@ -368,35 +377,45 @@ namespace MiNET.Worlds
 			chunk.SetHeight(coordinates.X & 0x0f, coordinates.Z & 0x0f, (short) height);
 
 			// Recalc
-			Queue<BlockCoordinates> lightBfQueue = new Queue<BlockCoordinates>(sourceQueue);
-			HashSet<BlockCoordinates> lightBfSet = new HashSet<BlockCoordinates>(sourceQueue);
+			var lightBfQueue = new Queue<BlockCoordinates>(sourceQueue);
+			var lightBfSet = new HashSet<BlockCoordinates>(sourceQueue);
 
-			SkyLightBlockAccess blockAccess = new SkyLightBlockAccess(level.WorldProvider);
+			var blockAccess = new SkyLightBlockAccess(level.WorldProvider);
 			Calculate(blockAccess, lightBfQueue, lightBfSet);
 		}
 
-		public void ResetLight(Level level, Queue<BlockCoordinates> resetQueue, Queue<BlockCoordinates> sourceQueue, BlockCoordinates coordinates)
+		public void ResetLight(
+			Level level,
+			Queue<BlockCoordinates> resetQueue,
+			Queue<BlockCoordinates> sourceQueue,
+			BlockCoordinates coordinates)
 		{
 			int currentLight = level.GetSkyLight(coordinates);
 
-			if (coordinates.Y < 255)
-				TestForSource(level, resetQueue, sourceQueue, coordinates.BlockUp(), currentLight);
-			if (coordinates.Y > 0)
-				TestForSource(level, resetQueue, sourceQueue, coordinates.BlockDown(), currentLight, true);
+			if (coordinates.Y < 255) TestForSource(level, resetQueue, sourceQueue, coordinates.BlockUp(), currentLight);
+			if (coordinates.Y > 0) TestForSource(level, resetQueue, sourceQueue, coordinates.BlockDown(), currentLight, true);
 			TestForSource(level, resetQueue, sourceQueue, coordinates.BlockWest(), currentLight);
 			TestForSource(level, resetQueue, sourceQueue, coordinates.BlockEast(), currentLight);
 			TestForSource(level, resetQueue, sourceQueue, coordinates.BlockNorth(), currentLight);
 			TestForSource(level, resetQueue, sourceQueue, coordinates.BlockSouth(), currentLight);
 		}
 
-		private void TestForSource(Level level, Queue<BlockCoordinates> resetQueue, Queue<BlockCoordinates> sourceQueue, BlockCoordinates coordinates, int currentLight, bool down = false)
+		private void TestForSource(
+			Level level,
+			Queue<BlockCoordinates> resetQueue,
+			Queue<BlockCoordinates> sourceQueue,
+			BlockCoordinates coordinates,
+			int currentLight,
+			bool down = false)
 		{
 			int light = level.GetSkyLight(coordinates);
+
 			if (light == 0) return;
 
 			if (light > currentLight || (light == 15 && !down))
 			{
 				if (!sourceQueue.Contains(coordinates)) sourceQueue.Enqueue(coordinates);
+
 				return;
 			}
 
@@ -414,28 +433,35 @@ namespace MiNET.Worlds
 
 				while (lightBfQueue.Count > 0)
 				{
-					var coordinates = lightBfQueue.Dequeue();
+					BlockCoordinates coordinates = lightBfQueue.Dequeue();
 					lightBfSet.Remove(coordinates);
+
 					if (coordinates.Y < 0 || coordinates.Y > 255)
 					{
 						Log.Warn($"Y coord out of bounce {coordinates.Y}");
+
 						continue;
 					}
 
 					ChunkColumn chunk = level.GetChunk(coordinates);
+
 					if (chunk == null)
 					{
 						Log.Warn("Chunk was null");
+
 						continue;
 					}
 
 					var newChunkCoord = (ChunkCoordinates) coordinates;
+
 					if (chunk.x != newChunkCoord.X || chunk.z != newChunkCoord.Z)
 					{
 						chunk = level.GetChunk(newChunkCoord);
+
 						if (chunk == null)
 						{
 							Log.Warn("Chunk with new coords was null");
+
 							continue;
 						}
 					}
@@ -449,7 +475,12 @@ namespace MiNET.Worlds
 			}
 		}
 
-		private void ProcessNode(IBlockAccess level, ChunkColumn chunk, BlockCoordinates coordinates, Queue<BlockCoordinates> lightBfsQueue, HashSet<BlockCoordinates> lightBfSet)
+		private void ProcessNode(
+			IBlockAccess level,
+			ChunkColumn chunk,
+			BlockCoordinates coordinates,
+			Queue<BlockCoordinates> lightBfsQueue,
+			HashSet<BlockCoordinates> lightBfSet)
 		{
 			//if (section.IsAllAir())
 
@@ -459,30 +490,29 @@ namespace MiNET.Worlds
 			ChunkBase section = chunk.GetChunk(coordinates.Y);
 
 			byte maxSkyLight = currentSkyLight;
+
 			if (coordinates.Y < 255)
 			{
-				var up = coordinates.BlockUp();
+				BlockCoordinates up = coordinates.BlockUp();
 				maxSkyLight = Math.Max(maxSkyLight, SetLightLevel(level, chunk, section, sectionIdx, lightBfsQueue, lightBfSet, up, currentSkyLight, up: true));
 			}
 
 			if (coordinates.Y > 0)
 			{
-				var down = coordinates.BlockDown();
-				maxSkyLight = Math.Max(maxSkyLight, SetLightLevel(level, chunk, section, sectionIdx, lightBfsQueue, lightBfSet, down, currentSkyLight, down: true));
+				BlockCoordinates down = coordinates.BlockDown();
+				maxSkyLight = Math.Max(maxSkyLight, SetLightLevel(level, chunk, section, sectionIdx, lightBfsQueue, lightBfSet, down, currentSkyLight, true));
 			}
 
-			var west = coordinates.BlockWest();
+			BlockCoordinates west = coordinates.BlockWest();
 			maxSkyLight = Math.Max(maxSkyLight, SetLightLevel(level, chunk, section, sectionIdx, lightBfsQueue, lightBfSet, west, currentSkyLight));
 
-
-			var east = coordinates.BlockEast();
+			BlockCoordinates east = coordinates.BlockEast();
 			maxSkyLight = Math.Max(maxSkyLight, SetLightLevel(level, chunk, section, sectionIdx, lightBfsQueue, lightBfSet, east, currentSkyLight));
 
-
-			var south = coordinates.BlockSouth();
+			BlockCoordinates south = coordinates.BlockSouth();
 			maxSkyLight = Math.Max(maxSkyLight, SetLightLevel(level, chunk, section, sectionIdx, lightBfsQueue, lightBfSet, south, currentSkyLight));
 
-			var north = coordinates.BlockNorth();
+			BlockCoordinates north = coordinates.BlockNorth();
 			maxSkyLight = Math.Max(maxSkyLight, SetLightLevel(level, chunk, section, sectionIdx, lightBfsQueue, lightBfSet, north, currentSkyLight));
 
 			if (IsTransparent(coordinates, section) && currentSkyLight != 15)
@@ -503,7 +533,17 @@ namespace MiNET.Worlds
 			}
 		}
 
-		private byte SetLightLevel(IBlockAccess level, ChunkColumn chunk, ChunkBase section, int sectionIdx, Queue<BlockCoordinates> lightBfsQueue, HashSet<BlockCoordinates> lightBfSet, BlockCoordinates coordinates, byte lightLevel, bool down = false, bool up = false)
+		private byte SetLightLevel(
+			IBlockAccess level,
+			ChunkColumn chunk,
+			ChunkBase section,
+			int sectionIdx,
+			Queue<BlockCoordinates> lightBfsQueue,
+			HashSet<BlockCoordinates> lightBfSet,
+			BlockCoordinates coordinates,
+			byte lightLevel,
+			bool down = false,
+			bool up = false)
 		{
 			//Interlocked.Add(ref visits, 1);
 
@@ -516,10 +556,7 @@ namespace MiNET.Worlds
 			}
 			else
 			{
-				if ((up || down) && coordinates.Y >> 4 != sectionIdx)
-				{
-					section = null;
-				}
+				if ((up || down) && coordinates.Y >> 4 != sectionIdx) section = null;
 			}
 
 			if (chunk == null /* || chunk.chunks == null*/) return lightLevel;
@@ -546,13 +583,9 @@ namespace MiNET.Worlds
 			byte skyLight = GetSkyLight(coordinates, section);
 
 			if (down && isTransparent && lightLevel == 15)
-			{
 				if (IsNotBlockingSkylight(coordinates, chunk))
 				{
-					if (skyLight != 15)
-					{
-						SetSkyLight(coordinates, 15, chunk);
-					}
+					if (skyLight != 15) SetSkyLight(coordinates, 15, chunk);
 
 					if (!lightBfSet.Contains(coordinates))
 					{
@@ -562,11 +595,11 @@ namespace MiNET.Worlds
 
 					return 15;
 				}
-			}
 
 			if (isTransparent)
 			{
 				int diffuseLevel = GetDiffuseLevel(coordinates, section);
+
 				if (skyLight + 1 + diffuseLevel <= lightLevel)
 				{
 					byte newLevel = (byte) (lightLevel - diffuseLevel);
@@ -595,6 +628,7 @@ namespace MiNET.Worlds
 			if (chunk == null) return true;
 
 			int bid = chunk.GetBlock(blockCoordinates.X & 0x0f, blockCoordinates.Y & 0xff, blockCoordinates.Z & 0x0f);
+
 			return bid == 0 || (BlockFactory.TransparentBlocks[bid] == 1 && bid != 18 && bid != 161 && bid != 30 && bid != 8 && bid != 9);
 		}
 
@@ -608,6 +642,7 @@ namespace MiNET.Worlds
 			int bz = blockCoordinates.Z & 0x0f;
 
 			int bid = section.GetBlock(bx, by - 16 * (by >> 4), bz);
+
 			return bid == 8 || bid == 9 ? 3 : bid == 18 || bid == 161 || bid == 30 ? 2 : 1;
 		}
 
@@ -620,6 +655,7 @@ namespace MiNET.Worlds
 			int bz = blockCoordinates.Z & 0x0f;
 
 			int bid = section.GetBlock(bx, by - 16 * (by >> 4), bz);
+
 			return bid == 0 || BlockFactory.TransparentBlocks[bid] == 1;
 		}
 
@@ -650,15 +686,12 @@ namespace MiNET.Worlds
 
 		private void MakeVisit(BlockCoordinates inc)
 		{
-			BlockCoordinates coordinates = new BlockCoordinates(inc.X, 0, inc.Z);
+			var coordinates = new BlockCoordinates(inc.X, 0, inc.Z);
+
 			if (Visits.ContainsKey(coordinates))
-			{
 				Visits[coordinates] = Visits[coordinates] + 1;
-			}
 			else
-			{
 				Visits.TryAdd(coordinates, 1);
-			}
 		}
 
 		public static void CheckIfSpawnIsMiddle(IOrderedEnumerable<ChunkColumn> chunks, Vector3 spawnPoint)
@@ -680,26 +713,21 @@ namespace MiNET.Worlds
 			if (zm == (int) spawnPoint.Z >> 4 && xm == (int) spawnPoint.X >> 4) Log.Warn($"Spawn correct {xm}, {zm} and {(int) spawnPoint.X >> 4}, {(int) spawnPoint.Z >> 4}");
 		}
 
-		private object _imageSync = new object();
-		private static int _chunkCount;
-
-		public List<Task<Bitmap>> RenderingTasks { get; } = new List<Task<Bitmap>>();
-
 		public void SnapshotVisits()
 		{
 			lock (_imageSync)
 			{
 				if (!TrackResults) return;
 
-				var visits1 = Visits.ToArray();
+				KeyValuePair<BlockCoordinates, int>[] visits1 = Visits.ToArray();
 
 				if (visits1.Length == 0) return;
 
 				long time = Environment.TickCount;
 
-				Task<Bitmap> t = new Task<Bitmap>(v =>
+				var t = new Task<Bitmap>(v =>
 				{
-					var fileId = time;
+					long fileId = time;
 
 					try
 					{
@@ -720,14 +748,14 @@ namespace MiNET.Worlds
 						int xMov = xMin < 0 ? Math.Abs(xMin) : xMin * -1;
 
 						//Bitmap bitmap = new Bitmap(xd + 1, zd + 1, PixelFormat.Format32bppArgb);
-						Bitmap bitmap = new Bitmap(GetWidth(), GetHeight(), PixelFormat.Format32bppArgb);
+						var bitmap = new Bitmap(GetWidth(), GetHeight(), PixelFormat.Format32bppArgb);
 
-						foreach (var visit in visits)
-						{
+						foreach (KeyValuePair<BlockCoordinates, int> visit in visits)
 							try
 							{
 								double logBase = 4;
 								double min = Math.Abs(Math.Ceiling(Math.Log(1, logBase)));
+
 								if (visit.Value == 0) continue;
 								//bitmap.SetPixel(visit.Key.X + xMov, visit.Key.Z + zMov, new ColorHeatMap().GetColorForValue(visit.Value, valMax));
 								bitmap.SetPixel(visit.Key.X + xMov, visit.Key.Z + zMov, new ColorHeatMap().GetColorForValue(Math.Log(visit.Value, logBase) + min, Math.Log(valMax, logBase) + min));
@@ -739,9 +767,9 @@ namespace MiNET.Worlds
 							catch (Exception e)
 							{
 								Log.Error($"{xd}, {zd}, {xMin}, {zMin}, {xMax}, {zMax}, X={visit.Key.X}, Z={visit.Key.Z}, {xMov}, {zMov}", e);
+
 								break;
 							}
-						}
 						//byte[] bytes = new byte[xd*zd*4];
 						//int i = 0;
 						//for (int x = 0; x < xd; x++)
@@ -751,7 +779,6 @@ namespace MiNET.Worlds
 						//        bytes[i++*4] = image[x, z];
 						//    }
 						//}
-
 
 						//var interval = valMax/zd;
 						//for (int i = 0; i < zd; i++)
@@ -765,7 +792,6 @@ namespace MiNET.Worlds
 						//    bitmap.SetPixel(1, i, CreateHeatColor((int) value, (decimal) max));
 						//}
 
-
 						//using (Graphics g = Graphics.FromImage(bitmap))
 						//{
 						//    int tz = 0;
@@ -776,10 +802,7 @@ namespace MiNET.Worlds
 						//    }
 						//}
 
-						using (Graphics g = Graphics.FromImage(bitmap))
-						{
-							g.DrawString($"MiNET skylight calculation\nTime (ms): {fileId - StartTimeInMilliseconds:N0}\n{_chunkCount:N0} chunks with {(_chunkCount * 16 * 16 * 256):N0} blocks\n{visits.Sum(pair => pair.Value):N0} visits", new Font("Arial", 8), new SolidBrush(Color.White), 1, 0); // requires font, brush etc
-						}
+						using (var g = Graphics.FromImage(bitmap)) g.DrawString($"MiNET skylight calculation\nTime (ms): {fileId - StartTimeInMilliseconds:N0}\n{_chunkCount:N0} chunks with {(_chunkCount * 16 * 16 * 256):N0} blocks\n{visits.Sum(pair => pair.Value):N0} visits", new Font("Arial", 8), new SolidBrush(Color.White), 1, 0); // requires font, brush etc
 
 						//Directory.CreateDirectory(@"D:\Temp\Light\");
 
@@ -797,6 +820,7 @@ namespace MiNET.Worlds
 						//}
 
 						Log.Debug($"Made a total of {visits.Sum(pair => pair.Value):N0} visits");
+
 						return bitmap;
 					}
 					catch (Exception e)
@@ -814,7 +838,7 @@ namespace MiNET.Worlds
 		{
 			if (!TrackResults) return 0;
 
-			var visits = chunks.ToArray();
+			ChunkColumn[] visits = chunks.ToArray();
 
 			int xMin = visits.OrderBy(kvp => kvp.x).First().x;
 			int xMax = visits.OrderByDescending(kvp => kvp.x).First().x;
@@ -827,7 +851,7 @@ namespace MiNET.Worlds
 		{
 			if (!TrackResults) return 0;
 
-			var visits = chunks.ToArray();
+			ChunkColumn[] visits = chunks.ToArray();
 
 			int xMin = visits.OrderBy(kvp => kvp.x).First().x;
 			int xMax = visits.OrderByDescending(kvp => kvp.x).First().x;
@@ -840,7 +864,7 @@ namespace MiNET.Worlds
 		{
 			if (!TrackResults) return 0;
 
-			var visits = Visits.ToArray();
+			KeyValuePair<BlockCoordinates, int>[] visits = Visits.ToArray();
 
 			int xMin = visits.OrderBy(kvp => kvp.Key.X).First().Key.X;
 			int xMax = visits.OrderByDescending(kvp => kvp.Key.X).First().Key.X;
@@ -853,7 +877,7 @@ namespace MiNET.Worlds
 		{
 			if (!TrackResults) return 0;
 
-			var visits = Visits.ToArray();
+			KeyValuePair<BlockCoordinates, int>[] visits = Visits.ToArray();
 
 			int zMin = visits.OrderBy(kvp => kvp.Key.Z).First().Key.Z;
 			int zMax = visits.OrderByDescending(kvp => kvp.Key.Z).First().Key.Z;
@@ -868,8 +892,7 @@ namespace MiNET.Worlds
 			{
 				if (!TrackResults) return;
 
-
-				var moviePath = @"D:\Temp\Light\test.avi";
+				string moviePath = @"D:\Temp\Light\test.avi";
 				Log.Debug($"Generated all images, now rendering movie to {moviePath}");
 
 				//var files = Directory.EnumerateFiles(@"D:\Temp\Light\", "*.bmp");
@@ -887,7 +910,7 @@ namespace MiNET.Worlds
 					EmitIndex1 = true
 				};
 
-				var stream = writer.AddVideoStream();
+				IAviVideoStream stream = writer.AddVideoStream();
 				stream.Width = GetWidth();
 				stream.Height = GetHeight();
 				stream.Codec = KnownFourCCs.Codecs.Uncompressed;
@@ -895,7 +918,8 @@ namespace MiNET.Worlds
 				stream.BitsPerPixel = BitsPerPixel.Bpp32;
 
 				Log.Debug($"Waiting for image rendering of {RenderingTasks.Count} images to complete");
-				foreach (var renderingTask in RenderingTasks)
+
+				foreach (Task<Bitmap> renderingTask in RenderingTasks)
 				{
 					renderingTask.RunSynchronously();
 					Bitmap image = renderingTask.Result;
@@ -913,13 +937,11 @@ namespace MiNET.Worlds
 						if (imageData == null)
 						{
 							Log.Warn("No image data for file.");
+
 							continue;
 						}
 
-						if (imageData.Length != stream.Height * stream.Width * 4)
-						{
-							imageData = imageData.Skip(imageData.Length - (stream.Height * stream.Width * 4)).ToArray();
-						}
+						if (imageData.Length != stream.Height * stream.Width * 4) imageData = imageData.Skip(imageData.Length - (stream.Height * stream.Width * 4)).ToArray();
 
 						// fill frameData with image
 
@@ -942,9 +964,10 @@ namespace MiNET.Worlds
 
 		public static byte[] ToByteArray(Image image, ImageFormat format)
 		{
-			using (MemoryStream ms = new MemoryStream())
+			using (var ms = new MemoryStream())
 			{
 				image.Save(ms, format);
+
 				return ms.ToArray();
 			}
 		}
@@ -993,9 +1016,14 @@ namespace MiNET.Worlds
 			return !(x > 0 && x < 15 && z > 0 && z < 15);
 		}
 
-		private static int GetHigestSurrounding(int x, int z, ChunkColumn chunk, IBlockAccess level)
+		private static int GetHigestSurrounding(
+			int x,
+			int z,
+			ChunkColumn chunk,
+			IBlockAccess level)
 		{
 			int h = chunk.GetHeight(x, z);
+
 			if (h == 255) return h;
 
 			if (x == 0 || x == 15 || z == 0 || z == 15)
@@ -1009,6 +1037,7 @@ namespace MiNET.Worlds
 				h = Math.Max(h, level.GetHeight(coords.BlockSouth()));
 				if (h > 255) h = 255;
 				if (h < 0) h = 0;
+
 				return h;
 			}
 
@@ -1038,20 +1067,18 @@ namespace MiNET.Worlds
 			if (chunk == null) return;
 
 			for (int x = 0; x < 16; x++)
+			for (int z = 0; z < 16; z++)
 			{
-				for (int z = 0; z < 16; z++)
-				{
-					var y = chunk.GetHeight(x, z);
-					chunk.SetBlock(x, y, z, 41);
-					//for (byte y = 255; y > 0; y--)
-					//{
-					//	if (chunk.GetSkylight(x, y, z) == 0)
-					//	{
-					//		chunk.SetBlock(x, y, z, 41);
-					//		break;
-					//	}
-					//}
-				}
+				byte y = chunk.GetHeight(x, z);
+				chunk.SetBlock(x, y, z, 41);
+				//for (byte y = 255; y > 0; y--)
+				//{
+				//	if (chunk.GetSkylight(x, y, z) == 0)
+				//	{
+				//		chunk.SetBlock(x, y, z, 41);
+				//		break;
+				//	}
+				//}
 			}
 		}
 	}
@@ -1059,6 +1086,9 @@ namespace MiNET.Worlds
 	public class ColorHeatMap
 	{
 		private static readonly ILog Log = LogManager.GetLogger(typeof(ColorHeatMap));
+
+		public byte Alpha = 0xff;
+		public List<Color> ColorsOfMap = new List<Color>();
 
 		public ColorHeatMap()
 		{
@@ -1099,15 +1129,16 @@ namespace MiNET.Worlds
 			Color cTarget = ColorsOfMap[blockIdx];
 			Color cNext = ColorsOfMap[blockIdx + 1];
 
-			var deltaR = cNext.R - cTarget.R;
-			var deltaG = cNext.G - cTarget.G;
-			var deltaB = cNext.B - cTarget.B;
+			int deltaR = cNext.R - cTarget.R;
+			int deltaG = cNext.G - cTarget.G;
+			int deltaB = cNext.B - cTarget.B;
 
-			var R = cTarget.R + (deltaR * percOfColor);
-			var G = cTarget.G + (deltaG * percOfColor);
-			var B = cTarget.B + (deltaB * percOfColor);
+			double R = cTarget.R + (deltaR * percOfColor);
+			double G = cTarget.G + (deltaG * percOfColor);
+			double B = cTarget.B + (deltaB * percOfColor);
 
 			Color c = ColorsOfMap[0];
+
 			try
 			{
 				c = Color.FromArgb(Alpha, (byte) R, (byte) G, (byte) B);
@@ -1115,10 +1146,8 @@ namespace MiNET.Worlds
 			catch (Exception ex)
 			{
 			}
+
 			return c;
 		}
-
-		public byte Alpha = 0xff;
-		public List<Color> ColorsOfMap = new List<Color>();
 	}
 }

@@ -37,6 +37,9 @@ namespace MiNET.Worlds
 	{
 		private static readonly ILog Log = LogManager.GetLogger(typeof(ChunkBase));
 
+		public NibbleArray blocklight = new NibbleArray(16 * 16 * 16);
+		public NibbleArray skylight = new NibbleArray(16 * 16 * 16);
+
 		public ChunkBase()
 		{
 			Array.Fill<byte>(skylight.Data, 0xff);
@@ -44,25 +47,36 @@ namespace MiNET.Worlds
 
 		public abstract bool IsDirty { get; }
 
-		public NibbleArray blocklight = new NibbleArray(16 * 16 * 16);
-		public NibbleArray skylight = new NibbleArray(16 * 16 * 16);
+		public abstract object Clone();
 
 		public abstract bool IsAllAir();
 
 		public abstract int GetBlock(int bx, int by, int bz);
 
-		public abstract void SetBlock(int bx, int by, int bz, int bid);
+		public abstract void SetBlock(
+			int bx,
+			int by,
+			int bz,
+			int bid);
 
 		public abstract byte GetMetadata(int bx, int by, int bz);
 
-		public abstract void SetMetadata(int bx, int by, int bz, byte data);
+		public abstract void SetMetadata(
+			int bx,
+			int by,
+			int bz,
+			byte data);
 
 		public byte GetBlocklight(int bx, int by, int bz)
 		{
 			return blocklight[GetIndex(bx, by, bz)];
 		}
 
-		public void SetBlocklight(int bx, int by, int bz, byte data)
+		public void SetBlocklight(
+			int bx,
+			int by,
+			int bz,
+			byte data)
 		{
 			blocklight[GetIndex(bx, by, bz)] = data;
 		}
@@ -72,14 +86,16 @@ namespace MiNET.Worlds
 			return skylight[GetIndex(bx, by, bz)];
 		}
 
-		public virtual void SetSkylight(int bx, int by, int bz, byte data)
+		public virtual void SetSkylight(
+			int bx,
+			int by,
+			int bz,
+			byte data)
 		{
 			skylight[GetIndex(bx, by, bz)] = data;
 		}
 
 		public abstract byte[] GetBytes(Stream stream);
-
-		public abstract object Clone();
 
 		public abstract void PutPool();
 
@@ -218,20 +234,12 @@ namespace MiNET.Worlds
 
 	public class ChunkPool<T>
 	{
+		const long MaxPoolSize = 10000000;
 		private static readonly ILog Log = LogManager.GetLogger(typeof(ChunkPool<T>));
-
-		private ConcurrentQueue<T> _objects;
 
 		private Func<T> _objectGenerator;
 
-		public void FillPool(int count)
-		{
-			for (int i = 0; i < count; i++)
-			{
-				var item = _objectGenerator();
-				_objects.Enqueue(item);
-			}
-		}
+		private ConcurrentQueue<T> _objects;
 
 		public ChunkPool(Func<T> objectGenerator)
 		{
@@ -240,16 +248,25 @@ namespace MiNET.Worlds
 			_objectGenerator = objectGenerator;
 		}
 
+		public void FillPool(int count)
+		{
+			for (int i = 0; i < count; i++)
+			{
+				T item = _objectGenerator();
+				_objects.Enqueue(item);
+			}
+		}
+
 		public T GetObject()
 		{
 			if (_objects.IsEmpty) return _objectGenerator();
 
 			T item;
+
 			if (_objects.TryDequeue(out item)) return item;
+
 			return _objectGenerator();
 		}
-
-		const long MaxPoolSize = 10000000;
 
 		public void PutObject(T item)
 		{

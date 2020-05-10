@@ -40,7 +40,7 @@ namespace MiNET.Worlds
 
 		public ChunkColumn GenerateChunkColumn(ChunkCoordinates chunkCoordinates)
 		{
-			ChunkColumn chunk = new ChunkColumn();
+			var chunk = new ChunkColumn();
 			chunk.x = chunkCoordinates.X;
 			chunk.z = chunkCoordinates.Z;
 			//chunk.biomeId = ArrayOf<byte>.Create(256, (byte) rand.Next(0, 37));
@@ -49,7 +49,6 @@ namespace MiNET.Worlds
 			//chunk.RecalcHeight();
 
 			//BuildStructures(chunk);
-
 
 			//chunk.SetBlock(0, h + 1, 0, 7);
 			//chunk.SetBlock(1, h + 1, 0, 41);
@@ -127,16 +126,11 @@ namespace MiNET.Worlds
 			if (chunk.x == 0 && chunk.z == 1)
 			{
 				for (int x = 3; x < 6; x++)
+				for (int y = 4; y < 7; y++)
 				{
-					for (int y = 4; y < 7; y++)
-					{
-						if (x == 4 && y < 6) continue;
+					if (x == 4 && y < 6) continue;
 
-						for (int z = 1; z < 15; z++)
-						{
-							chunk.SetBlock(x, y, z, 3);
-						}
-					}
+					for (int z = 1; z < 15; z++) chunk.SetBlock(x, y, z, 3);
 				}
 				chunk.SetBlock(4, 4, 14, 3);
 				chunk.SetBlock(4, 5, 14, 3);
@@ -164,15 +158,9 @@ namespace MiNET.Worlds
 			//}
 
 			if (chunk.x == -1 && chunk.z == 0)
-			{
 				for (int x = 1; x < 15; x++)
-				{
-					for (int z = 1; z < 15; z++)
-					{
-						chunk.SetBlock(x, 8, z, 3);
-					}
-				}
-			}
+				for (int z = 1; z < 15; z++)
+					chunk.SetBlock(x, 8, z, 3);
 		}
 
 		public int PopulateChunk(ChunkColumn chunk)
@@ -182,59 +170,54 @@ namespace MiNET.Worlds
 			int h = 0;
 
 			for (int x = 0; x < 16; x++)
+			for (int z = 0; z < 16; z++)
 			{
-				for (int z = 0; z < 16; z++)
-				{
-					h = 0;
+				h = 0;
 
-					chunk.SetBlock(x, h++, z, 7); // Bedrock
+				chunk.SetBlock(x, h++, z, 7); // Bedrock
 
-					//stones[i + h++] = 1; // Stone
-					//stones[i + h++] = 1; // Stone
+				//stones[i + h++] = 1; // Stone
+				//stones[i + h++] = 1; // Stone
 
-					//switch (random.Next(0, 20))
-					//{
-					//	case 0:
-					//		stones[i + h++] = 3; // Dirt
-					//		stones[i + h++] = 3;
-					//		break;
-					//	case 1:
-					//		stones[i + h++] = 1; // Stone
-					//		stones[i + h++] = 1; // Stone
-					//		break;
-					//	case 2:
-					//		stones[i + h++] = 13; // Gravel
-					//		stones[i + h++] = 13; // Gravel
-					//		break;
-					//	case 3:
-					//		stones[i + h++] = 14; // Gold
-					//		stones[i + h++] = 14; // Gold
-					//		break;
-					//	case 4:
-					//		stones[i + h++] = 16; // Cole
-					//		stones[i + h++] = 16; // Cole
-					//		break;
-					//	case 5:
-					//		stones[i + h++] = 56; // Dimond
-					//		stones[i + h++] = 56; // Dimond
-					//		break;
-					//	default:
-					//		stones[i + h++] = 1; // Stone
-					//		stones[i + h++] = 1; // Stone
-					//		break;
-					//}
-					chunk.SetBlock(x, h++, z, 3); // Dirt
-					chunk.SetBlock(x, h++, z, 3); // Dirt
-					chunk.SetBlock(x, h++, z, 2); // Grass
+				//switch (random.Next(0, 20))
+				//{
+				//	case 0:
+				//		stones[i + h++] = 3; // Dirt
+				//		stones[i + h++] = 3;
+				//		break;
+				//	case 1:
+				//		stones[i + h++] = 1; // Stone
+				//		stones[i + h++] = 1; // Stone
+				//		break;
+				//	case 2:
+				//		stones[i + h++] = 13; // Gravel
+				//		stones[i + h++] = 13; // Gravel
+				//		break;
+				//	case 3:
+				//		stones[i + h++] = 14; // Gold
+				//		stones[i + h++] = 14; // Gold
+				//		break;
+				//	case 4:
+				//		stones[i + h++] = 16; // Cole
+				//		stones[i + h++] = 16; // Cole
+				//		break;
+				//	case 5:
+				//		stones[i + h++] = 56; // Dimond
+				//		stones[i + h++] = 56; // Dimond
+				//		break;
+				//	default:
+				//		stones[i + h++] = 1; // Stone
+				//		stones[i + h++] = 1; // Stone
+				//		break;
+				//}
+				chunk.SetBlock(x, h++, z, 3); // Dirt
+				chunk.SetBlock(x, h++, z, 3); // Dirt
+				chunk.SetBlock(x, h++, z, 2); // Grass
 
-					chunk.SetHeight(x, z, (short) h);
-					for (int i = h - 1; i >= 0; i--)
-					{
-						chunk.SetSkyLight(x, i, z, 0);
-					}
+				chunk.SetHeight(x, z, (short) h);
+				for (int i = h - 1; i >= 0; i--) chunk.SetSkyLight(x, i, z, 0);
 
-					chunk.SetBiome(x, z, 1);
-				}
+				chunk.SetBiome(x, z, 1);
 			}
 
 			return h;

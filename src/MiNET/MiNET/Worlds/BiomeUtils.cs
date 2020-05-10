@@ -29,16 +29,27 @@ namespace MiNET.Worlds
 {
 	public class Biome
 	{
+		public float Downfall;
+		public int Foliage; // r,g,b, NOT multiplied by alpha
+		public int Grass; // r,g,b, NOT multiplied by alpha
 		public int Id;
 		public string Name;
 		public float Temperature;
-		public float Downfall;
-		public int Grass; // r,g,b, NOT multiplied by alpha
-		public int Foliage; // r,g,b, NOT multiplied by alpha
 	}
 
 	public class BiomeUtils
 	{
+		private const int FOREST_BIOME = 4;
+		private const int SWAMPLAND_BIOME = 6;
+		private const int FOREST_HILLS_BIOME = 18;
+		private const int BIRCH_FOREST_BIOME = 27;
+		private const int BIRCH_FOREST_HILLS_BIOME = 28;
+		private const int ROOFED_FOREST_BIOME = 29;
+
+		private const int MESA_BIOME = 37;
+		private const int MESA_PLATEAU_F_BIOME = 38;
+		private const int MESA_PLATEAU_BIOME = 39;
+
 		public static Biome[] Biomes =
 		{
 			new Biome
@@ -491,13 +502,6 @@ namespace MiNET.Worlds
 			}
 		};
 
-		private struct BiomeCorner
-		{
-			public int Red;
-			public int Green;
-			public int Blue;
-		}
-
 		//$c = self::interpolateColor(256, $x, $z, [0x47, 0xd0, 0x33], [0x6c, 0xb4, 0x93], [0xbf, 0xb6, 0x55], [0x80, 0xb4, 0x97]);
 
 		//private static BiomeCorner[] PEgrassCorners = new BiomeCorner[3]
@@ -557,7 +561,11 @@ namespace MiNET.Worlds
 		}
 
 		// NOTE: elevation is number of meters above a height of 64. If elevation is < 64, pass in 0.
-		private int BiomeColor(float temperature, float rainfall, int elevation, BiomeCorner[] corners)
+		private int BiomeColor(
+			float temperature,
+			float rainfall,
+			int elevation,
+			BiomeCorner[] corners)
 		{
 			// get UVs
 			temperature = Clamp(temperature - elevation * 0.00166667f, 0.0f, 1.0f);
@@ -568,12 +576,13 @@ namespace MiNET.Worlds
 			// UV is essentially temperature, rainfall
 
 			// lambda values for barycentric coordinates
-			float[] lambda = new float[3];
+			var lambda = new float[3];
 			lambda[0] = temperature - rainfall;
 			lambda[1] = 1.0f - temperature;
 			lambda[2] = rainfall;
 
 			float red = 0.0f, green = 0.0f, blue = 0.0f;
+
 			for (int i = 0; i < 3; i++)
 			{
 				red += lambda[i] * corners[i].Red;
@@ -610,17 +619,6 @@ namespace MiNET.Worlds
 			//var desertGrass = GetBiome(2).grass;
 			//if(mesaGrass != desertGrass) throw new Exception("Mesa: " + mesaGrass + " Desert: " + desertGrass);
 		}
-
-		private const int FOREST_BIOME = 4;
-		private const int SWAMPLAND_BIOME = 6;
-		private const int FOREST_HILLS_BIOME = 18;
-		private const int BIRCH_FOREST_BIOME = 27;
-		private const int BIRCH_FOREST_HILLS_BIOME = 28;
-		private const int ROOFED_FOREST_BIOME = 29;
-
-		private const int MESA_BIOME = 37;
-		private const int MESA_PLATEAU_F_BIOME = 38;
-		private const int MESA_PLATEAU_BIOME = 39;
 
 
 		// elevation == 0 means for precomputed colors and for elevation off
@@ -659,15 +657,14 @@ namespace MiNET.Worlds
 					if (isGrass)
 					{
 						color = BiomeGrassColor(GetBiome(biome).Temperature, GetBiome(biome).Downfall, elevation);
+
 						// the fefefe makes it so that carries are copied to the low bit,
 						// then their magic "go to green" color offset is added in, then
 						// divide by two gives a carry that will nicely go away.
 						return ((color & 0xfefefe) + 0x28340a) / 2;
 					}
 					else
-					{
 						return BiomeFoliageColor(GetBiome(biome).Temperature, GetBiome(biome).Downfall, elevation);
-					}
 
 				case MESA_BIOME:
 				case MESA_PLATEAU_F_BIOME:
@@ -702,6 +699,13 @@ namespace MiNET.Worlds
 			color = (r << 16) | (g << 8) | b;
 
 			return color;
+		}
+
+		private struct BiomeCorner
+		{
+			public int Red;
+			public int Green;
+			public int Blue;
 		}
 	}
 }

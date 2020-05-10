@@ -39,17 +39,19 @@ namespace MiNET.Worlds
 	{
 		private static readonly ILog Log = LogManager.GetLogger(typeof(PaletteChunk));
 
-		private bool _useAlexChunks = true;
-
-		private bool _isAllAir = true;
+		private static readonly ChunkPool<PaletteChunk> Pool = new ChunkPool<PaletteChunk>(() => new PaletteChunk(Config.GetProperty("UseAlexChunks", false)));
 
 		private short[] _blocks = new short[4096];
-		private NibbleArray _metadata = new NibbleArray(16 * 16 * 16);
-		private short[] _loggedBlocks = new short[4096];
-		private NibbleArray _loggedMetadata = new NibbleArray(16 * 16 * 16);
 
 		private byte[] _cache;
+
+		private bool _isAllAir = true;
 		private bool _isDirty;
+		private short[] _loggedBlocks = new short[4096];
+		private NibbleArray _loggedMetadata = new NibbleArray(16 * 16 * 16);
+		private NibbleArray _metadata = new NibbleArray(16 * 16 * 16);
+
+		private bool _useAlexChunks = true;
 
 		public PaletteChunk(bool useAlexChunks = false)
 		{
@@ -61,10 +63,9 @@ namespace MiNET.Worlds
 		public override bool IsAllAir()
 		{
 			if (_isDirty)
-			{
 				_isAllAir = _blocks.All(b => b == 0);
-				//_isDirty = false;
-			}
+			//_isDirty = false;
+
 			return _isAllAir;
 		}
 
@@ -78,7 +79,11 @@ namespace MiNET.Worlds
 			return _blocks[GetIndex(bx, by, bz)];
 		}
 
-		public override void SetBlock(int bx, int by, int bz, int bid)
+		public override void SetBlock(
+			int bx,
+			int by,
+			int bz,
+			int bid)
 		{
 			_blocks[GetIndex(bx, by, bz)] = (short) bid;
 			_cache = null;
@@ -90,7 +95,11 @@ namespace MiNET.Worlds
 			return _loggedBlocks[GetIndex(bx, by, bz)];
 		}
 
-		public void SetLoggedBlock(int bx, int by, int bz, int bid)
+		public void SetLoggedBlock(
+			int bx,
+			int by,
+			int bz,
+			int bid)
 		{
 			_loggedBlocks[GetIndex(bx, by, bz)] = (short) bid;
 			_cache = null;
@@ -102,7 +111,11 @@ namespace MiNET.Worlds
 			return _metadata[GetIndex(bx, by, bz)];
 		}
 
-		public override void SetMetadata(int bx, int by, int bz, byte data)
+		public override void SetMetadata(
+			int bx,
+			int by,
+			int bz,
+			byte data)
 		{
 			_metadata[GetIndex(bx, by, bz)] = data;
 			_cache = null;
@@ -114,7 +127,11 @@ namespace MiNET.Worlds
 			return _loggedMetadata[GetIndex(bx, by, bz)];
 		}
 
-		public void SetLoggedMetadata(int bx, int by, int bz, byte data)
+		public void SetLoggedMetadata(
+			int bx,
+			int by,
+			int bz,
+			byte data)
 		{
 			_loggedMetadata[GetIndex(bx, by, bz)] = data;
 			_cache = null;
@@ -126,6 +143,7 @@ namespace MiNET.Worlds
 			if (_cache != null)
 			{
 				instream.Write(_cache);
+
 				return _cache;
 			}
 
@@ -139,10 +157,7 @@ namespace MiNET.Worlds
 				if (WriteStore(stream, _blocks, _metadata, false))
 				{
 					numberOfStores++;
-					if (WriteStore(stream, _loggedBlocks, _loggedMetadata, false))
-					{
-						numberOfStores++;
-					}
+					if (WriteStore(stream, _loggedBlocks, _loggedMetadata, false)) numberOfStores++;
 				}
 
 				// Special implementation for the Alex client by Kennyvv. Will send
@@ -156,7 +171,7 @@ namespace MiNET.Worlds
 				stream.Position = 1;
 				stream.WriteByte((byte) numberOfStores); // storage size
 
-				var bytes = stream.ToArray();
+				byte[] bytes = stream.ToArray();
 				instream.Write(bytes);
 				_cache = bytes;
 			}
@@ -164,15 +179,20 @@ namespace MiNET.Worlds
 			return _cache;
 		}
 
-		private static bool WriteStore(MemoryStream stream, short[] blocks, NibbleArray metadata, bool forceWrite)
+		private static bool WriteStore(
+			MemoryStream stream,
+			short[] blocks,
+			NibbleArray metadata,
+			bool forceWrite)
 		{
 			var palette = new Dictionary<uint, byte>();
 			uint prevHash = uint.MaxValue;
+
 			for (int i = 0; i < 4096; i++)
 			{
 				uint hash = (uint) blocks[i] << 4 | metadata[i]; // 1.7
-				if (hash == prevHash)
-					continue;
+
+				if (hash == prevHash) continue;
 
 				prevHash = hash;
 				palette[hash] = 0;
@@ -186,6 +206,7 @@ namespace MiNET.Worlds
 				case 0:
 					if (!forceWrite && palette.ContainsKey(0)) return false;
 					bitsPerBlock = 1;
+
 					break;
 				case 1:
 				case 2:
@@ -204,10 +225,12 @@ namespace MiNET.Worlds
 				case 8:
 					//Paletted8 = 8,  // 4 blocks per word
 					bitsPerBlock = 8;
+
 					break;
 				case int i when i > 8:
 					//Paletted16 = 16, // 2 blocks per word
 					bitsPerBlock = 16;
+
 					break;
 			}
 
@@ -217,21 +240,19 @@ namespace MiNET.Worlds
 			int wordsPerChunk = (int) Math.Ceiling(4096f / blocksPerWord);
 
 			byte t = 0;
-			foreach (var b in palette.ToArray())
-			{
-				palette[b.Key] = t++;
-			}
+			foreach (KeyValuePair<uint, byte> b in palette.ToArray()) palette[b.Key] = t++;
 
-			uint[] indexes = new uint[wordsPerChunk];
+			var indexes = new uint[wordsPerChunk];
 
 			int position = 0;
+
 			for (int w = 0; w < wordsPerChunk; w++)
 			{
 				uint word = 0;
+
 				for (int block = 0; block < blocksPerWord; block++)
 				{
-					if (position >= 4096)
-						continue;
+					if (position >= 4096) continue;
 
 					uint state = palette[(uint) blocks[position] << 4 | metadata[position]];
 					word |= state << (bitsPerBlock * block);
@@ -245,17 +266,14 @@ namespace MiNET.Worlds
 				indexes[w] = word;
 			}
 
-			byte[] ba = new byte[indexes.Length * 4];
+			var ba = new byte[indexes.Length * 4];
 			Buffer.BlockCopy(indexes, 0, ba, 0, indexes.Length * 4);
 			stream.Write(ba, 0, ba.Length);
 
 			int[] legacyToRuntimeId = BlockFactory.LegacyToRuntimeId;
 
 			VarInt.WriteSInt32(stream, palette.Count); // count
-			foreach (var val in palette)
-			{
-				VarInt.WriteSInt32(stream, legacyToRuntimeId[val.Key]);
-			}
+			foreach (KeyValuePair<uint, byte> val in palette) VarInt.WriteSInt32(stream, legacyToRuntimeId[val.Key]);
 
 			return true;
 		}
@@ -273,15 +291,10 @@ namespace MiNET.Worlds
 			blocklight.Data.CopyTo(cc.blocklight.Data, 0);
 			skylight.Data.CopyTo(cc.skylight.Data, 0);
 
-			if (_cache != null)
-			{
-				cc._cache = (byte[]) _cache.Clone();
-			}
+			if (_cache != null) cc._cache = (byte[]) _cache.Clone();
 
 			return cc;
 		}
-
-		private static readonly ChunkPool<PaletteChunk> Pool = new ChunkPool<PaletteChunk>(() => new PaletteChunk(Config.GetProperty("UseAlexChunks", false)));
 
 		public static PaletteChunk CreateObject()
 		{

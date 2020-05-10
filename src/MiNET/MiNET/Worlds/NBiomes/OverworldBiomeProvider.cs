@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 using MiNET.Worlds.Generator;
 
@@ -29,10 +27,8 @@ namespace MiNET.Worlds.NBiomes
 			int length,
 			bool catheFlag)
 		{
-			NBiome biome = new NBiome(); //todo:add biome
+			var biome = new NBiome(); //todo:add biome
 			biomeFactoryLayer.GenerateBiomes(x, z, width, length, biome);
 		}
-
-
 	}
 }
