@@ -66,8 +66,8 @@ namespace MiNET.Worlds
 		{
 			SharedSeedRandom sharedSeedRandom = new SharedSeedRandom();
 			sharedSeedRandom.SetBaseChunkSeed(chunk.x, chunk.z);
-			SetBlocksInChunk(chunk.x, chunk.z, chunk);
 			//Biome[] abiome = biomeProvider.GetBiomeBlock(chunk.x * 16, chunk.z * 16)
+			SetBlocksInChunk(chunk.x, chunk.z, chunk);
 
 
 
@@ -149,13 +149,13 @@ namespace MiNET.Worlds
 
 		private void GenerateHeightMap(int x, int y, int z, double[] p_202108_5_)
 		{
-			double[] adouble = this.depthNoise.Add(x, z, 5, 5, 200.0D, 200.0D, 0.5D);
+			double[] adouble = depthNoise.Add(x, z, 5, 5, 200.0D, 200.0D, 0.5D);
 			float coordinateScale = 684.412F;
 			float heightScale = 684.412F;
-			double[] adouble1 = this.mainPerlinNoise.Add(x, y, z, 5, 33, 5,
+			double[] adouble1 = mainPerlinNoise.Add(x, y, z, 5, 33, 5,
 				coordinateScale / 80.0F, heightScale / 160.0F, coordinateScale / 80.0F);
-			double[] adouble2 = this.minLimitPerlinNoise.Add(x, y, z, 5, 33, 5, coordinateScale, heightScale, coordinateScale);
-			double[] adouble3 = this.maxLimitPerlinNoise.Add(x, y, z, 5, 33, 5, coordinateScale, heightScale, coordinateScale);
+			double[] adouble2 = minLimitPerlinNoise.Add(x, y, z, 5, 33, 5, coordinateScale, heightScale, coordinateScale);
+			double[] adouble3 = maxLimitPerlinNoise.Add(x, y, z, 5, 33, 5, coordinateScale, heightScale, coordinateScale);
 			int i = 0;
 			int j = 0;
 
