@@ -21,6 +21,12 @@ namespace MiNET.Worlds.Generator
 			Z = pos.GetZ() >> 4;
 		}
 
+		public ChunkPos(ChunkColumn chunk)
+		{
+			X = chunk.x;
+			Z = chunk.z;
+		}
+
 		public long AsLong()
 		{
 			return AsLong(X, Z);

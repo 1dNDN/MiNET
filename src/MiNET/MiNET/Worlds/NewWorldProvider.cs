@@ -5,6 +5,7 @@ using System.Numerics;
 using MiNET.Blocks;
 using MiNET.Utils;
 using MiNET.Worlds.Generator;
+using MiNET.Worlds.NBiomes;
 
 namespace MiNET.Worlds
 {
@@ -22,9 +23,12 @@ namespace MiNET.Worlds
 		private readonly ConcurrentDictionary<ChunkCoordinates, ChunkColumn> chunkCache = new ConcurrentDictionary<ChunkCoordinates, ChunkColumn>();
 		public long Seed { get; set; }
 
+		public NBiomeProvider BiomeProvider;
+
 		public void Initialize()
 		{
 			IsCaching = true;
+			Seed = Config.GetProperty("Seed", "1234").ToLower().Trim().GetHashCode();
 			SharedSeedRandom sharedSeedRandom = new SharedSeedRandom(Seed);
 			minLimitPerlinNoise = new OctavesNoise(sharedSeedRandom, 16);
 			maxLimitPerlinNoise = new OctavesNoise(sharedSeedRandom, 16);
@@ -33,6 +37,7 @@ namespace MiNET.Worlds
 			scaleNoise = new OctavesNoise(sharedSeedRandom, 10);
 			depthNoise = new OctavesNoise(sharedSeedRandom, 16);
 			biomeWeight = new float[25];
+			BiomeProvider = new OverworldBiomeProvider();
 
 			for (int i = -2; i <= 2; ++i)
 			{
@@ -66,9 +71,9 @@ namespace MiNET.Worlds
 		{
 			SharedSeedRandom sharedSeedRandom = new SharedSeedRandom();
 			sharedSeedRandom.SetBaseChunkSeed(chunk.x, chunk.z);
-			//Biome[] abiome = biomeProvider.GetBiomeBlock(chunk.x * 16, chunk.z * 16)
+			NBiome[] abiome = BiomeProvider.GetBiomeBlock(chunk.x * 16, chunk.z * 16, 16, 16);
+			chunk.SetNBiomes(abiome);
 			SetBlocksInChunk(chunk.x, chunk.z, chunk);
-
 
 
 		}
@@ -248,9 +253,25 @@ namespace MiNET.Worlds
 			}
 		}
 
-		public void BuildSurface(ChunkColumn chunk, Biome[] biomesIn, SharedSeedRandom random, int seaLevel)
+		public void BuildSurface(ChunkColumn chunk, Biome[] biomes, SharedSeedRandom random, int seaLevel)
 		{
-			throw new NotImplementedException();
+			double d0 = 0.03125D;
+			ChunkPos chunkpos = new ChunkPos(chunk);
+			int i = chunkpos.GetXStart();
+			int j = chunkpos.GetZStart();
+			double[] adouble = GenerateNoiseRegion(chunkpos.X, chunkpos.Z);
+
+			for (int k = 0; k < 16; ++k)
+			{
+				for (int l = 0; l < 16; ++l)
+				{
+					int i1 = i + k;
+					int j1 = j + l;
+					int k1 = chunk.getTopBlockY(Heightmap.Type.WORLD_SURFACE_WG, k, l) + 1;
+					biomes[l * 16 + k].buildSurface(random, chunkIn, i1, j1, k1, adouble[l * 16 + k], new Stone(), new Water(), seaLevel, Seed);
+				}
+			}
+
 		}
 
 		private double[] GenerateNoiseRegion(int x, int y)

@@ -39,6 +39,7 @@ using log4net;
 using MiNET.Blocks;
 using MiNET.Net;
 using MiNET.Utils;
+using MiNET.Worlds.NBiomes;
 
 namespace MiNET.Worlds
 {
@@ -553,6 +554,20 @@ namespace MiNET.Worlds
 		{
 			return GetEnumerator();
 		}
+
+
+
+		//
+		//============================================================
+		//NEW BIOMES
+		//============================================================
+		//
+		public NBiome[] NBiomes;
+
+		public void SetNBiomes(NBiome[] abiome)
+		{
+			NBiomes = abiome;
+		}
 	}
 
 
@@ -561,17 +576,18 @@ namespace MiNET.Worlds
 		public static T[] Create(int size, T initialValue)
 		{
 			T[] array = (T[]) Array.CreateInstance(typeof(T), size);
-			for (int i = 0; i < array.Length; i++)
-				array[i] = initialValue;
+			for (int i = 0; i < array.Length; i++) array[i] = initialValue;
+
 			return array;
 		}
 
 		public static T[] Create(int size)
 		{
 			T[] array = (T[]) Array.CreateInstance(typeof(T), size);
-			for (int i = 0; i < array.Length; i++)
-				array[i] = new T();
+			for (int i = 0; i < array.Length; i++) array[i] = new T();
+
 			return array;
 		}
+
 	}
 }
