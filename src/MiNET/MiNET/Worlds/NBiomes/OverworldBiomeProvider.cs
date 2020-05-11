@@ -6,6 +6,15 @@ namespace MiNET.Worlds.NBiomes
 {
 	class OverworldBiomeProvider : NBiomeProvider
 	{
+		private GenLayer genBiomes;
+		private GenLayer biomeFactoryLayer;
+
+		public OverworldBiomeProvider()
+		{
+			//GenLayer[] agenlayer = LayerUtil.buildOverworldProcedure(worldinfo.getSeed(), worldinfo.getTerrainType(), overworldgensettings);
+			this.genBiomes = agenlayer[0];
+			this.biomeFactoryLayer = agenlayer[1];
+		}
 		public override NBiome GetBiome(BlockPos pos, NBiome defaultBiome)
 		{
 			return defaultBiome;
@@ -27,7 +36,7 @@ namespace MiNET.Worlds.NBiomes
 			int length,
 			bool catheFlag)
 		{
-			var biome = new NBiome(); //todo:add biome
+
 			biomeFactoryLayer.GenerateBiomes(x, z, width, length, biome);
 		}
 	}

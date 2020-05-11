@@ -273,7 +273,7 @@ namespace MiNET.Worlds
 
 		public void BuildSurface(
 			ChunkColumn chunk,
-			Biome[] biomes,
+			NBiome[] biomes,
 			SharedSeedRandom random,
 			int seaLevel)
 		{
@@ -288,8 +288,8 @@ namespace MiNET.Worlds
 			{
 				int i1 = i + k;
 				int j1 = j + l;
-				int k1 = chunk.getTopBlockY(Heightmap.Type.WORLD_SURFACE_WG, k, l) + 1;
-				biomes[l * 16 + k].buildSurface(random, chunkIn, i1, j1, k1, adouble[l * 16 + k], new Stone(), new Water(), seaLevel, Seed);
+				int k1 = chunk.GetTopBlockY(k, l) + 1;
+				biomes[l * 16 + k].BuildSurface(random, chunk, i1, j1, k1, adouble[l * 16 + k], new Stone(), new Water(), seaLevel, Seed);
 			}
 		}
 
