@@ -30,7 +30,8 @@ namespace MiNET.Worlds
 		public void Initialize()
 		{
 			IsCaching = true;
-			Seed = Config.GetProperty("Seed", "1234").ToLower().Trim().GetHashCode();
+
+			Seed = Config.GetProperty("Seed", "1234").ToLower().Trim().GetHashCode(); //todo: 64 bit hash
 			var sharedSeedRandom = new SharedSeedRandom(Seed);
 			minLimitPerlinNoise = new OctavesNoise(sharedSeedRandom, 16);
 			maxLimitPerlinNoise = new OctavesNoise(sharedSeedRandom, 16);

@@ -109,7 +109,8 @@ namespace MiNET
 					TntExplodes = Config.GetProperty("GameRule.TntExplodes", true),
 					SendCommandfeedback = Config.GetProperty("GameRule.SendCommandfeedback", true),
 					RandomTickSpeed = Config.GetProperty("GameRule.RandomTickSpeed", 3),
-				};
+					Seed = Config.GetProperty("Seed", "1234").ToLower().Trim().GetHashCode() //todo: 64 bit hash
+			};
 				level.Initialize();
 
 				//if (Config.GetProperty("CalculateLights", false))

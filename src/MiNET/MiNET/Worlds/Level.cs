@@ -213,6 +213,8 @@ namespace MiNET.Worlds
 
 		public int RandomTickSpeed { get; set; } = 3;
 
+		public long Seed { get; set; } = 0; //todo: хранить сид
+
 		public Block GetBlock(BlockCoordinates blockCoordinates, ChunkColumn tryChunk = null)
 		{
 			ChunkColumn chunk = null;

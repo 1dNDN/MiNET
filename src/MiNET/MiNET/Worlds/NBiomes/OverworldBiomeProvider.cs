@@ -11,7 +11,7 @@ namespace MiNET.Worlds.NBiomes
 
 		public OverworldBiomeProvider()
 		{
-			//GenLayer[] agenlayer = LayerUtil.buildOverworldProcedure(worldinfo.getSeed(), worldinfo.getTerrainType(), overworldgensettings);
+			GenLayer[] agenlayer = LayerUtil.buildOverworldProcedure(worldinfo.getSeed(), worldinfo.getTerrainType(), overworldgensettings);
 			this.genBiomes = agenlayer[0];
 			this.biomeFactoryLayer = agenlayer[1];
 		}
