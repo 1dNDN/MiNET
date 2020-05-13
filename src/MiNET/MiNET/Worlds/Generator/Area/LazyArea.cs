@@ -1,9 +1,9 @@
 ﻿namespace MiNET.Worlds.Generator.Area
 {
-	class LazyArea : IArea
+	public class LazyArea : IArea
 	{
 		private IPixelTransformer PixelTransformer;
-		LazyArea(IPixelTransformer pixelTransformer)
+		public LazyArea(AreaDimension dimension, IPixelTransformer pixelTransformer)
 		{
 			PixelTransformer = pixelTransformer;
 		}

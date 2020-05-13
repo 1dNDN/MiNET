@@ -1,5 +1,6 @@
 ﻿using System;
 
+using MiNET.Utils;
 using MiNET.Worlds.Generator;
 
 namespace MiNET.Worlds.NBiomes
@@ -11,7 +12,9 @@ namespace MiNET.Worlds.NBiomes
 
 		public OverworldBiomeProvider()
 		{
-			GenLayer[] agenlayer = LayerUtil.buildOverworldProcedure(worldinfo.getSeed(), worldinfo.getTerrainType(), overworldgensettings);
+			OverWorldGenSettings overWorldGenSettings = new OverWorldGenSettings();
+			int seed = Config.GetProperty("Seed", "1234").ToLower().Trim().GetHashCode(); //todo: 64 bit hash
+			GenLayer[] agenlayer = LayerUtil.buildOverworldProcedure(seed, worldinfo.getTerrainType(), overWorldGenSettings);
 			this.genBiomes = agenlayer[0];
 			this.biomeFactoryLayer = agenlayer[1];
 		}
