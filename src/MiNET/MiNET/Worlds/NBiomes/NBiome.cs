@@ -10,26 +10,61 @@ namespace MiNET.Worlds.NBiomes
 {
 	public class NBiome
 	{
+		public enum Categories
+		{
+			None,
+			Taiga,
+			ExtremeHills,
+			Jungle,
+			Mesa,
+			Plains,
+			Savanna,
+			Icy,
+			Theend,
+			Beach,
+			Forest,
+			Ocean,
+			Desert,
+			River,
+			Swamp,
+			Mushroom,
+			Nether
+		}
+
+		public enum RainType
+		{
+			None,
+			Rain,
+			Snow
+		}
+
+		public enum TempCategory
+		{
+			Ocean,
+			Cold,
+			Medium,
+			Warm
+		}
+
+		public static SurfaceBuilderConfig AIR_SURFACE = new SurfaceBuilderConfig(new Air(), new Air(), new Air());
 		public Categories Category;
 		public float Depth;
 		public float Downfall;
 		public PerlinNoise InfoNoise = new PerlinNoise(new LongRandom(2345L), 1);
 		[CanBeNull] public string Parent;
-		public NBiome.RainType Precipitation;
+		public RainType Precipitation;
 		public float Scale;
+		public CompositeSurfaceBuilder SurfaceBuilder;
 		public float Temperature;
 		public PerlinNoise TemperatureNoise = new PerlinNoise(new LongRandom(1234L), 1);
 		[CanBeNull] public string TranslationKey;
 		public int WaterColor;
 		public int WaterFogColor;
-		public CompositeSurfaceBuilder SurfaceBuilder;
-		public static SurfaceBuilderConfig AIR_SURFACE = new SurfaceBuilderConfig(new Air(), new Air(), new Air());
 
 		private NBiome(BiomeBuilder biomeBuilder)
 		{
-			if(biomeBuilder.SurfaceBuilder != null && biomeBuilder.Precipitation != null && biomeBuilder.Category != null && biomeBuilder.Depth != null && biomeBuilder.Scale != null && biomeBuilder.Temperature != null && biomeBuilder.Downfall != null && biomeBuilder.WaterColor != null && biomeBuilder.WaterFogColor != null)
+			if (biomeBuilder.SurfaceBuilder != null && biomeBuilder.Precipitation != null && biomeBuilder.Category != null && biomeBuilder.Depth != null && biomeBuilder.Scale != null && biomeBuilder.Temperature != null && biomeBuilder.Downfall != null && biomeBuilder.WaterColor != null && biomeBuilder.WaterFogColor != null)
 			{
-
 				SurfaceBuilder = biomeBuilder.SurfaceBuilder;
 				Precipitation = (RainType) biomeBuilder.Precipitation;
 				Category = (Categories) biomeBuilder.Category;
@@ -42,9 +77,7 @@ namespace MiNET.Worlds.NBiomes
 				Parent = biomeBuilder.Parent;
 			}
 			else
-			{
 				throw new ArgumentNullException();
-			}
 		}
 
 		public bool IsMutation()
@@ -70,25 +103,24 @@ namespace MiNET.Worlds.NBiomes
 
 		public class BiomeBuilder
 		{
-			public CompositeSurfaceBuilder? SurfaceBuilder;
-
-			public RainType? Precipitation;
-
 			public Categories? Category;
 
 			public float? Depth;
 
+			public float? Downfall;
+
+			[CanBeNull] public string Parent;
+
+			public RainType? Precipitation;
+
 			public float? Scale;
+			public CompositeSurfaceBuilder? SurfaceBuilder;
 
 			public float? Temperature;
-
-			public float? Downfall;
 
 			public int? WaterColor;
 
 			public int? WaterFogColor;
-			
-			[CanBeNull] public string Parent;
 
 			public BiomeBuilder SetSurfaceBuilder(CompositeSurfaceBuilder surfaceBuilder)
 			{
@@ -163,7 +195,7 @@ namespace MiNET.Worlds.NBiomes
 			public new string ToString()
 			{
 				return "BiomeBuilder{" +
-						"\nSurfaceBuilder=" + SurfaceBuilder.ToString() + "," +
+						"\nSurfaceBuilder=" + SurfaceBuilder + "," +
 						"\nPrecipitation=" + Precipitation + "," +
 						"\nBiomeCategory=" + Category + "," +
 						"\nDepth=" + Depth + "," +
@@ -175,41 +207,6 @@ namespace MiNET.Worlds.NBiomes
 						"\nParent='" + Parent + '\'' + "" +
 						"\n" + '}';
 			}
-		}
-
-		public enum Categories
-		{
-			None,
-			Taiga,
-			ExtremeHills,
-			Jungle,
-			Mesa,
-			Plains,
-			Savanna,
-			Icy,
-			Theend,
-			Beach,
-			Forest,
-			Ocean,
-			Desert,
-			River,
-			Swamp,
-			Mushroom,
-			Nether
-		}
-
-		public enum RainType
-		{
-			None,
-			Rain,
-			Snow
-		}
-		public enum TempCategory
-		{
-			Ocean,
-			Cold,
-			Medium,
-			Warm
 		}
 	}
 }

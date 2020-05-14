@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MiNET.Worlds.Generator.Layers
+﻿namespace MiNET.Worlds.Generator.Layers
 {
 	interface IContext
 	{

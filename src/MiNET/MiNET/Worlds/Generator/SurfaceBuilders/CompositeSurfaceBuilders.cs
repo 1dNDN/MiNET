@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using MiNET.Blocks;
+﻿using MiNET.Blocks;
 using MiNET.Worlds.NBiomes;
 
 namespace MiNET.Worlds.Generator.SurfaceBuilders
 {
-	public class CompositeSurfaceBuilder:ISurfaceBuilder
+	public class CompositeSurfaceBuilder : ISurfaceBuilder
 	{
-		private ISurfaceBuilder SurfaceBuilder;
 		private SurfaceBuilderConfig Config;
+		private ISurfaceBuilder SurfaceBuilder;
 
 		public CompositeSurfaceBuilder(ISurfaceBuilder surfaceBuilder, SurfaceBuilderConfig config)
 		{

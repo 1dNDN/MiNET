@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 
 using MiNET.Worlds.Generator.Area;
 using MiNET.Worlds.NBiomes;
@@ -25,16 +21,13 @@ namespace MiNET.Worlds.Generator
 			int zSize,
 			[CanBeNull] NBiome defaultBiome)
 		{
-			AreaDimension areadimension = new AreaDimension(startX, startZ, xSize, zSize);
+			var areadimension = new AreaDimension(startX, startZ, xSize, zSize);
 			LazyArea lazyarea = LazyAreaFactory.Make(areadimension);
-			NBiome[] abiome = new NBiome[xSize * zSize];
+			var abiome = new NBiome[xSize * zSize];
+
 			for (int i = 0; i < zSize; ++i)
-			{
-				for (int j = 0; j < xSize; ++j)
-				{
-					abiome[j + i * xSize] = NBiome.GetBiome(lazyarea.GetValue(j, i), defaultBiome);
-				}
-			}
+			for (int j = 0; j < xSize; ++j)
+				abiome[j + i * xSize] = NBiome.GetBiome(lazyarea.GetValue(j, i), defaultBiome);
 
 			return abiome;
 		}

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using MiNET.Blocks;
+﻿using MiNET.Blocks;
 using MiNET.Worlds.NBiomes;
 
 namespace MiNET.Worlds.Generator.SurfaceBuilders

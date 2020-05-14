@@ -4,9 +4,9 @@ namespace MiNET.Worlds.Generator.SurfaceBuilders
 {
 	public class SurfaceBuilderConfig
 	{
-		private Block Top;
-		private Block Middle;
 		private Block Bottom;
+		private Block Middle;
+		private Block Top;
 
 		public SurfaceBuilderConfig(Block top, Block middle, Block bottom)
 		{

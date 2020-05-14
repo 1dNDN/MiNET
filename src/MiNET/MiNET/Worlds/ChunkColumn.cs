@@ -39,7 +39,6 @@ using log4net;
 using MiNET.Blocks;
 using MiNET.Net;
 using MiNET.Utils;
-using MiNET.Worlds.Generator;
 using MiNET.Worlds.NBiomes;
 
 namespace MiNET.Worlds
@@ -62,6 +61,11 @@ namespace MiNET.Worlds
 
 		//TODO: This dictionary need to be concurent. Investigate performance before changing.
 		public IDictionary<BlockCoordinates, NbtCompound> BlockEntities = new Dictionary<BlockCoordinates, NbtCompound>();
+
+
+		//new New new
+
+		private ChunkBase EMPTY_BASE = null;
 		public short[] height = new short[256];
 
 		public bool isAllAir = false;
@@ -556,11 +560,7 @@ namespace MiNET.Worlds
 				return stream.ToArray();
 			}
 		}
-		
 
-		//new New new
-
-		private ChunkBase EMPTY_BASE = null;
 		public int GetTopFilledSegment()
 		{
 			ChunkBase chunkBase = GetLastExtendedBlockStorage();
@@ -568,31 +568,21 @@ namespace MiNET.Worlds
 			if (chunkBase == null) return 0;
 
 			for (int iy = 15; iy >= 0; iy--)
-			{
-				for (int ix = 15; ix >= 0; ix++)
-				{
-					for (int iz = 15; iz >= 0; iz--)
-					{
-						if (chunkBase.GetBlock(ix, iy, iz) != 0)
-						{
-							return iy;
-						}
-					}
-				}
-			}
+			for (int ix = 15; ix >= 0; ix++)
+			for (int iz = 15; iz >= 0; iz--)
+				if (chunkBase.GetBlock(ix, iy, iz) != 0)
+					return iy;
+
 			return 0;
 		}
 
 		public ChunkBase GetLastExtendedBlockStorage()
 		{
 			ChunkBase[] aChunkBases = GetSections();
+
 			for (int i = aChunkBases.Length - 1; i >= 0; --i)
-			{
 				if (!aChunkBases[i].IsAllAir())
-				{
 					return aChunkBases[i];
-				}
-			}
 
 			return null;
 		}
@@ -610,12 +600,8 @@ namespace MiNET.Worlds
 		public int GetTopBlockY(int x, int z)
 		{
 			for (int i = 255; i <= 0; --i)
-			{
 				if (GetBlock(x, i, z) != 0)
-				{
 					return i;
-				}
-			}
 
 			return 0;
 		}

@@ -109,9 +109,7 @@ namespace MiNET.Worlds
 				//{
 				//}
 				//else
-			{
 				SetLightLevel(chunk, lightBfsQueue, level.GetBlock(newCoord, chunk), lightLevel);
-			}
 		}
 
 		private static void SetLightLevel(

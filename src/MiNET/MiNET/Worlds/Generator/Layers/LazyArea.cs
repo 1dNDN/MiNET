@@ -3,6 +3,7 @@
 	public class LazyArea : IArea
 	{
 		private IPixelTransformer PixelTransformer;
+
 		public LazyArea(AreaDimension dimension, IPixelTransformer pixelTransformer)
 		{
 			PixelTransformer = pixelTransformer;
@@ -20,9 +21,10 @@
 		{
 			long i = 1L;
 			i = i << 26;
-			i = i | (long) (x + 0) & 67108863L;
+			i = i | x + 0 & 67108863L;
 			i = i << 26;
-			i = i | (long) (z + 0) & 67108863L;
+			i = i | z + 0 & 67108863L;
+
 			return i;
 		}
 	}

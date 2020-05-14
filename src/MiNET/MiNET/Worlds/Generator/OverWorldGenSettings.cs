@@ -4,25 +4,15 @@ namespace MiNET.Worlds.Generator
 {
 	public class OverWorldGenSettings
 	{
-		protected int villageDistance = 32;
-		protected int villageSeparation = 8;
-		protected int oceanMonumentSpacing = 32;
-		protected int oceanMonumentSeparation = 5;
-		protected int strongholdDistance = 32;
-		protected int strongholdCount = 128;
-		protected int strongholdSpread = 3;
 		protected int biomeFeatureDistance = 32;
 		protected int biomeFeatureSeparation = 8;
-		protected int field_204027_h = 16;
-		protected int field_211734_k = 8;
-		protected int endCityDistance = 20;
-		protected int endCitySeparation = 11;
-		protected int field_204749_j = 16;
-		protected int field_211736_o = 8;
-		protected int mansionDistance = 80;
-		protected int field_211737_q = 20;
 		protected Block defaultBlock = new Stone();
 		protected Block defaultFluid = new Water();
+		protected int endCityDistance = 20;
+		protected int endCitySeparation = 11;
+		private double field_202209_A = 12.0D;
+		private double field_202210_B = 512.0D;
+		private double field_202211_C = 512.0D;
 		private int field_202212_j = 4;
 		private int field_202213_k = 4;
 		private int field_202214_l = -1;
@@ -40,9 +30,19 @@ namespace MiNET.Worlds.Generator
 		private float field_202226_x = 0.0F;
 		private float field_202227_y = 1.0F;
 		private double field_202228_z = 8.5D;
-		private double field_202209_A = 12.0D;
-		private double field_202210_B = 512.0D;
-		private double field_202211_C = 512.0D;
+		protected int field_204027_h = 16;
+		protected int field_204749_j = 16;
+		protected int field_211734_k = 8;
+		protected int field_211736_o = 8;
+		protected int field_211737_q = 20;
+		protected int mansionDistance = 80;
+		protected int oceanMonumentSeparation = 5;
+		protected int oceanMonumentSpacing = 32;
+		protected int strongholdCount = 128;
+		protected int strongholdDistance = 32;
+		protected int strongholdSpread = 3;
+		protected int villageDistance = 32;
+		protected int villageSeparation = 8;
 
 		public int GetVillageDistance()
 		{

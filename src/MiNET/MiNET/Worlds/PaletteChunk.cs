@@ -62,8 +62,7 @@ namespace MiNET.Worlds
 
 		public override bool IsAllAir()
 		{
-			if (_isDirty)
-				_isAllAir = _blocks.All(b => b == 0);
+			if (_isDirty) _isAllAir = _blocks.All(b => b == 0);
 			//_isDirty = false;
 
 			return _isAllAir;

@@ -7,7 +7,11 @@
 		private int xSize;
 		private int zSize;
 
-		public AreaDimension(int startX, int startZ, int xSize, int zSize)
+		public AreaDimension(
+			int startX,
+			int startZ,
+			int xSize,
+			int zSize)
 		{
 			this.startX = startX;
 			this.startZ = startZ;
