@@ -1,11 +1,27 @@
-﻿namespace MiNET.Worlds.Generator.Area
+﻿using MiNET.Worlds.Generator.Layers;
+
+namespace MiNET.Worlds.Generator.Area
 {
-	class LayerContext
+	public class LayerContext<A>:IContextExtended<A> where A : IArea
 	{
 		private long Seed;
 		private long PositionHash;
-		protected long SeedModifier;
-		protected ImprovedNoise noiseGenerator;
+		public long SeedModifier;
+		public ImprovedNoise noiseGenerator;
+
+		public A MakeArea(AreaDimension dimensionIn, IPixelTransformer transformer)
+		{
+		}
+
+		public A MakeArea(AreaDimension dimensionIn, IPixelTransformer transformer, A p_201489_3_)
+		{
+			return MakeArea(dimensionIn, transformer);
+		}
+
+		public A MakeArea(AreaDimension dimensionIn, IPixelTransformer transformer, A p_201488_3_, A p_201488_4_)
+		{
+			return MakeArea(dimensionIn, transformer);
+		}
 
 		public LayerContext(long seedModifier)
 		{

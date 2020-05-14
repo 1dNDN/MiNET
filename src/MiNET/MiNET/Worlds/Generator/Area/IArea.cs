@@ -1,6 +1,6 @@
 ﻿namespace MiNET.Worlds.Generator.Area
 {
-	internal interface IArea
+	public interface IArea
 	{
 		int GetValue(int x, int z);
 	}

@@ -2,7 +2,7 @@
 
 namespace MiNET.Worlds.Generator
 {
-	internal class ImprovedNoise
+	public class ImprovedNoise
 	{
 		private static double[] GRAD_X =
 		{
