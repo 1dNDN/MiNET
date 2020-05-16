@@ -16,9 +16,9 @@ namespace MiNET.Worlds.NBiomes
 		{
 			var overWorldGenSettings = new OverWorldGenSettings();
 			int seed = Config.GetProperty("Seed", "1234").ToLower().Trim().GetHashCode(); //todo: 64 bit hash
-			GenLayer[] agenlayer = LayerUtil.BuildOverworldProcedure<LazyArea>(overWorldGenSettings, seed);
-			genBiomes = agenlayer[0];
-			biomeFactoryLayer = agenlayer[1];
+			//GenLayer[] agenlayer = LayerUtil.BuildOverworldProcedure<LazyArea>(overWorldGenSettings, seed);
+			genBiomes = new GenLayer(); /*agenlayer[0];*/
+			biomeFactoryLayer = new GenLayer(); /*agenlayer[1];*/
 		}
 
 		public override NBiome GetBiome(BlockPos pos, NBiome defaultBiome)
