@@ -19,10 +19,12 @@ namespace MiNET.Worlds
 		private OctavesNoise depthNoise;
 		private OctavesNoise mainPerlinNoise;
 		private OctavesNoise maxLimitPerlinNoise;
-
 		private OctavesNoise minLimitPerlinNoise;
 		private OctavesNoise scaleNoise;
 		private PerlinNoise surfaceNoise;
+		private OverWorldGenSettings settings;
+		private Block defaultBlock;
+		private Block defaultFluid;
 
 		public long Seed { get; set; }
 
@@ -42,6 +44,9 @@ namespace MiNET.Worlds
 			depthNoise = new OctavesNoise(sharedSeedRandom, 16);
 			biomeWeight = new float[25];
 			BiomeProvider = new OverworldBiomeProvider();
+			settings = new OverWorldGenSettings();
+			defaultBlock = settings.GetDefaultBlock();
+			defaultFluid = settings.GetDefaultFluid();
 
 			for (int i = -2; i <= 2; ++i)
 			for (int j = -2; j <= 2; ++j)
@@ -110,13 +115,16 @@ namespace MiNET.Worlds
 			NBiome[] abiome = BiomeProvider.GetBiomeBlock(chunk.x * 16, chunk.z * 16, 16, 16);
 			chunk.SetNBiomes(abiome);
 			SetBlocksInChunk(chunk.x, chunk.z, chunk);
+			BuildSurface(ref chunk, abiome, sharedSeedRandom, settings.GetSeaLevel());
 		}
 
 		private void SetBlocksInChunk(int chunkX, int chunkZ, ChunkColumn chunk)
 		{
+			NBiome[] abiome = BiomeProvider.GetBiomes(chunk.x * 4 - 2, chunk.z * 4 - 2, 10, 10);
 			var adouble = new double[825];
-			GenerateHeightMap(chunk.x * 4, 0, chunk.z * 4, adouble);
+			GenerateHeightMap(abiome, chunk.x * 4, 0, chunk.z * 4, adouble);
 
+			BlockPos blockPos;
 			for (int i = 0; i < 4; ++i)
 			{
 				int j = i * 5;
@@ -160,12 +168,13 @@ namespace MiNET.Worlds
 									int x = i * 4 + k2;
 									int y = i2 * 8 + j2;
 									int z = l * 4 + l2;
+									blockPos = new BlockPos(x, y, z);
 									Block block = new Air();
 
 									if ((d17 += d16) > 0.0D)
-										block = new Stone();
-									else if (i2 * 8 + j2 < 63) block = new Water();
-									chunk.SetBlock(x, y, z, block.Id);
+										block = defaultBlock;
+									else if (i2 * 8 + j2 < 63) block = defaultFluid;
+									chunk.SetBlock(blockPos, block.Id);
 								}
 
 								d10 += d12;
@@ -183,17 +192,18 @@ namespace MiNET.Worlds
 		}
 
 		private void GenerateHeightMap(
+			NBiome[] abiome,
 			int x,
 			int y,
 			int z,
-			double[] p_202108_5_)
+			double[] adouble0)
 		{
 			double[] adouble = depthNoise.Add(x, z, 5, 5, 200.0D, 200.0D, 0.5D);
-			float coordinateScale = 684.412F;
-			float heightScale = 684.412F;
+			float coordinateScale = settings.GetCoordinateScale();
+			float heightScale = settings.GetHeightScale();
 
 			double[] adouble1 = mainPerlinNoise.Add(x, y, z, 5, 33, 5,
-				coordinateScale / 80.0F, heightScale / 160.0F, coordinateScale / 80.0F);
+				coordinateScale / settings.GetMainNoiseScaleX(), heightScale / settings.GetMainNoiseScaleY(), coordinateScale / settings.GetMainNoiseScaleZ());
 			double[] adouble2 = minLimitPerlinNoise.Add(x, y, z, 5, 33, 5, coordinateScale, heightScale, coordinateScale);
 			double[] adouble3 = maxLimitPerlinNoise.Add(x, y, z, 5, 33, 5, coordinateScale, heightScale, coordinateScale);
 			int i = 0;
@@ -206,14 +216,21 @@ namespace MiNET.Worlds
 				float f3 = 0.0F;
 				float f4 = 0.0F;
 				int i1 = 2;
+				NBiome biome = abiome[k + 2 + (l + 2) * 10];
 
 				for (int j1 = -2; j1 <= 2; ++j1)
 				for (int k1 = -2; k1 <= 2; ++k1)
 				{
-					float f5 = 0.0F + 0.45F * 1.0F;
-					float f6 = 0.0F + 0.3F * 1.0F;
+					NBiome biome1 = abiome[k + j1 + 2 + (l + k1 + 2) * 10];
+					float f5 = settings.func_202203_v() + biome1.Depth * settings.func_202202_w();
+					float f6 = settings.func_202204_x() + biome1.Scale * settings.func_202205_y();
 
 					float f7 = biomeWeight[j1 + 2 + (k1 + 2) * 5] / (f5 + 2.0F);
+
+					if (biome1.Depth > biome.Depth)
+					{
+						f7 /= 2.0F;
+					}
 
 					f2 += f6 * f7;
 					f3 += f5 * f7;
@@ -248,16 +265,16 @@ namespace MiNET.Worlds
 				double d8 = f3;
 				double d9 = f2;
 				d8 = d8 + d7 * 0.2D;
-				d8 = d8 * 8.5D / 8.0D;
-				double d0 = 8.5D + d8 * 4.0D;
+				d8 = d8 * settings.func_202201_z() / 8.0D;
+				double d0 = settings.func_202201_z() + d8 * 4.0D;
 
 				for (int l1 = 0; l1 < 33; ++l1)
 				{
-					double d1 = (l1 - d0) * 12.0D * 128.0D / 256.0D / d9;
+					double d1 = (l1 - d0) * settings.func_202206_A() * 128.0D / 256.0D / d9;
 					if (d1 < 0.0D) d1 *= 4.0D;
 
-					double d2 = adouble2[i] / 512.0D;
-					double d3 = adouble3[i] / 512.0D;
+					double d2 = adouble2[i] / settings.GetLowerLimitScale();
+					double d3 = adouble3[i] / settings.GetUpperLimitScale();
 					double d4 = (adouble1[i] / 10.0D + 1.0D) / 2.0D;
 					double d5 = MathHelper.ClampedLerp(d2, d3, d4) - d1;
 
@@ -267,14 +284,14 @@ namespace MiNET.Worlds
 						d5 = d5 * (1.0D - d6) - 10.0D * d6;
 					}
 
-					p_202108_5_[i] = d5;
+					adouble0[i] = d5;
 					++i;
 				}
 			}
 		}
 
 		public void BuildSurface(
-			ChunkColumn chunk,
+			ref ChunkColumn chunk,
 			NBiome[] biomes,
 			SharedSeedRandom random,
 			int seaLevel)
@@ -291,13 +308,14 @@ namespace MiNET.Worlds
 				int i1 = i + k;
 				int j1 = j + l;
 				int k1 = chunk.GetTopBlockY(k, l) + 1;
-				biomes[l * 16 + k].BuildSurface(random, chunk, i1, j1, k1, adouble[l * 16 + k], new Stone(), new Water(), seaLevel, Seed);
+				biomes[l * 16 + k].BuildSurface(random, ref chunk, i1, j1, k1, adouble[l * 16 + k], new Stone(), new Water(), seaLevel, Seed);
 			}
 		}
 
-		private double[] GenerateNoiseRegion(int x, int y)
+		private double[] GenerateNoiseRegion(int x, int z)
 		{
-			throw new NotImplementedException();
+			double d0 = 0.03125D;
+			return this.surfaceNoise.GenerateRegion((double) (x << 4), (double) (z << 4), 16, 16, 0.0625D, 0.0625D, 1.0D);
 		}
 	}
 }

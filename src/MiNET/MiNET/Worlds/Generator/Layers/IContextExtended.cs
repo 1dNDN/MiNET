@@ -6,15 +6,15 @@ namespace MiNET.Worlds.Generator.Layers
 	{
 		void SetPosition(long x, long z);
 
-		A MakeArea(AreaDimension dimensionIn, IPixelTransformer transformer);
+		//A MakeArea(AreaDimension dimensionIn, IPixelTransformer transformer);
 
-		A MakeArea(AreaDimension dimensionIn, IPixelTransformer transformer, A context);
+		//A MakeArea(AreaDimension dimensionIn, IPixelTransformer transformer, A context);
 
-		A MakeArea(
-			AreaDimension dimensionIn,
-			IPixelTransformer transformer,
-			A p_201488_3_,
-			A p_201488_4_);
+		//A MakeArea(
+		//	AreaDimension dimensionIn,
+		//	IPixelTransformer transformer,
+		//	A p_201488_3_,
+		//	A p_201488_4_);
 
 		int SelectRandomly(int[] choices);
 	}

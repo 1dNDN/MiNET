@@ -88,7 +88,7 @@ namespace MiNET.Worlds.NBiomes
 
 		public void BuildSurface(
 			LongRandom random,
-			ChunkColumn chunk,
+			ref ChunkColumn chunk,
 			int x,
 			int z,
 			int startHeight,
@@ -99,7 +99,7 @@ namespace MiNET.Worlds.NBiomes
 			long seed)
 		{
 			SurfaceBuilder.SetSeed(seed);
-			SurfaceBuilder.BuildSurface(random, chunk, this, x, z, startHeight, noise, defaultBlock, defaultFluid, seaLevel, seed, AIR_SURFACE);
+			SurfaceBuilder.BuildSurface(random, ref chunk, this, x, z, startHeight, noise, defaultBlock, defaultFluid, seaLevel, seed, AIR_SURFACE);
 		}
 
 		public float GetTemperature(BlockPos pos)

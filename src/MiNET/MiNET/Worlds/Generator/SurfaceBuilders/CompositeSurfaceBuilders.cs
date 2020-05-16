@@ -16,7 +16,7 @@ namespace MiNET.Worlds.Generator.SurfaceBuilders
 
 		public void BuildSurface(
 			LongRandom random,
-			ChunkColumn chunk,
+			ref ChunkColumn chunk,
 			NBiome biome,
 			int x,
 			int z,
@@ -28,7 +28,7 @@ namespace MiNET.Worlds.Generator.SurfaceBuilders
 			long seed,
 			SurfaceBuilderConfig config)
 		{
-			SurfaceBuilder.BuildSurface(random, chunk, biome, x, z, startHeight, noise, defaultBlock, defaultFluid, seaLevel, seed, config);
+			SurfaceBuilder.BuildSurface(random, ref chunk, biome, x, z, startHeight, noise, defaultBlock, defaultFluid, seaLevel, seed, config);
 		}
 
 		public void SetSeed(long seed)

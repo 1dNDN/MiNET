@@ -1,6 +1,6 @@
 ﻿namespace MiNET.Worlds.Generator.Area
 {
-	class LazyAreaLayerContext : LayerContext
+	class LazyAreaLayerContext : LayerContext<IArea>
 	{
 		public LazyAreaLayerContext(long seed, long p_i48647_5_) : base(p_i48647_5_)
 		{

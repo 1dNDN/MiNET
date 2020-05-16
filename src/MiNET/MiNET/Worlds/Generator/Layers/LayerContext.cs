@@ -20,23 +20,24 @@ namespace MiNET.Worlds.Generator.Area
 			SeedModifier += seedModifier;
 		}
 
-		public A MakeArea(AreaDimension dimensionIn, IPixelTransformer transformer)
-		{
-		}
+		//public A MakeArea(AreaDimension dimensionIn, IPixelTransformer transformer)
+		//{
 
-		public A MakeArea(AreaDimension dimensionIn, IPixelTransformer transformer, A p_201489_3_)
-		{
-			return MakeArea(dimensionIn, transformer);
-		}
+		//}
 
-		public A MakeArea(
-			AreaDimension dimensionIn,
-			IPixelTransformer transformer,
-			A p_201488_3_,
-			A p_201488_4_)
-		{
-			return MakeArea(dimensionIn, transformer);
-		}
+		//public A MakeArea(AreaDimension dimensionIn, IPixelTransformer transformer, A p_201489_3_)
+		//{
+		//	return MakeArea(dimensionIn, transformer);
+		//}
+
+		//public A MakeArea(
+		//	AreaDimension dimensionIn,
+		//	IPixelTransformer transformer,
+		//	A p_201488_3_,
+		//	A p_201488_4_)
+		//{
+		//	return MakeArea(dimensionIn, transformer);
+		//}
 
 		public void SetPosition(long x, long z)
 		{

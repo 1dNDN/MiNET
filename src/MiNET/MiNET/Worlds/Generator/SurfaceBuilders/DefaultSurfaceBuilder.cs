@@ -10,12 +10,12 @@ namespace MiNET.Worlds.Generator.SurfaceBuilders
 {
 	class DefaultSurfaceBuilder : ISurfaceBuilder
 	{
-		public void BuildSurface(LongRandom random, ChunkColumn chunk, NBiome biome, int x, int z, int startHeight, double noise, Block defaultBlock, Block defaultFluid, int seaLevel, long seed, SurfaceBuilderConfig config)
+		public void BuildSurface(LongRandom random, ref ChunkColumn chunk, NBiome biome, int x, int z, int startHeight, double noise, Block defaultBlock, Block defaultFluid, int seaLevel, long seed, SurfaceBuilderConfig config)
 		{
-			BuildSurface(random, chunk, biome, x, z, startHeight, noise, defaultBlock, defaultFluid, config.GetTop(), config.GetMiddle(), config.GetBottom(), seaLevel);
+			BuildSurface(random, ref chunk, biome, x, z, startHeight, noise, defaultBlock, defaultFluid, config.GetTop(), config.GetMiddle(), config.GetBottom(), seaLevel);
 		}
 
-		protected void BuildSurface(LongRandom random, ChunkColumn chunk, NBiome biome, int x, int z, int startHeight, double noise, Block defaultBlock, Block defaultFluid, Block top, Block middle, Block bottom, int sealevel)
+		protected void BuildSurface(LongRandom random, ref ChunkColumn chunk, NBiome biome, int x, int z, int startHeight, double noise, Block defaultBlock, Block defaultFluid, Block top, Block middle, Block bottom, int sealevel)
 		{
 			Block iblockstate = top;
 			Block iblockstate1 = middle;
