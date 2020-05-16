@@ -19,11 +19,11 @@ namespace MiNET.Worlds.Generator.Area
 		public static int DEEP_COLD_OCEAN = 49;
 		public static int DEEP_FROZEN_OCEAN = 50;
 
-		public static GenLayer[] BuildOverworldProcedure<T>([CanBeNull] OverWorldGenSettings overWorldGenSettings, long seed) where T : IArea
-		{
-			Func<long, LazyAreaLayerContext> func = context => new LazyAreaLayerContext(seed, context);
-			IAreaFactory<T> iAreaFactory;
-			iAreaFactory = GenLayerIsland.Apply(iAreaFactory, );
-		}
+		//public static GenLayer[] BuildOverworldProcedure<T>([CanBeNull] OverWorldGenSettings overWorldGenSettings, long seed) where T : IArea
+		//{
+		//	Func<long, LazyAreaLayerContext> func = context => new LazyAreaLayerContext(seed, context);
+		//	IAreaFactory<T> iAreaFactory;
+		//	iAreaFactory = GenLayerIsland.Apply(iAreaFactory, );
+		//}
 	}
 }
