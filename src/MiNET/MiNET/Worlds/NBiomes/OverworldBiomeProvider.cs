@@ -3,6 +3,7 @@
 using MiNET.Utils;
 using MiNET.Worlds.Generator;
 using MiNET.Worlds.Generator.Area;
+using MiNET.Worlds.Generator.GenUtils;
 
 namespace MiNET.Worlds.NBiomes
 {
@@ -16,8 +17,8 @@ namespace MiNET.Worlds.NBiomes
 			var overWorldGenSettings = new OverWorldGenSettings();
 			int seed = Config.GetProperty("Seed", "1234").ToLower().Trim().GetHashCode(); //todo: 64 bit hash
 			GenLayer[] agenlayer = LayerUtil.BuildOverworldProcedure<LazyArea>(overWorldGenSettings, seed);
-			this.genBiomes = agenlayer[0];
-			this.biomeFactoryLayer = agenlayer[1];
+			genBiomes = agenlayer[0];
+			biomeFactoryLayer = agenlayer[1];
 		}
 
 		public override NBiome GetBiome(BlockPos pos, NBiome defaultBiome)
@@ -31,7 +32,7 @@ namespace MiNET.Worlds.NBiomes
 			int xSize,
 			int zSize)
 		{
-			throw new NotImplementedException();
+			return GetBiomes(startX, startZ, xSize, zSize, true);
 		}
 
 		public override NBiome[] GetBiomes(
@@ -41,7 +42,7 @@ namespace MiNET.Worlds.NBiomes
 			int length,
 			bool catheFlag)
 		{
-			biomeFactoryLayer.GenerateBiomes(x, z, width, length, biome);
+			return biomeFactoryLayer.GenerateBiomes(x, z, width, length, new DesertBiome());
 		}
 	}
 }

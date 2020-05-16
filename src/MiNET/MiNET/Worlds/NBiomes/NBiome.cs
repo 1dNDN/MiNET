@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 
 using MiNET.Blocks;
 using MiNET.Worlds.Generator;
+using MiNET.Worlds.Generator.GenUtils;
 using MiNET.Worlds.Generator.SurfaceBuilders;
 
 namespace MiNET.Worlds.NBiomes
@@ -61,7 +62,7 @@ namespace MiNET.Worlds.NBiomes
 		public int WaterColor;
 		public int WaterFogColor;
 
-		private NBiome(BiomeBuilder biomeBuilder)
+		public NBiome(BiomeBuilder biomeBuilder)
 		{
 			if (biomeBuilder.SurfaceBuilder != null && biomeBuilder.Precipitation != null && biomeBuilder.Category != null && biomeBuilder.Depth != null && biomeBuilder.Scale != null && biomeBuilder.Temperature != null && biomeBuilder.Downfall != null && biomeBuilder.WaterColor != null && biomeBuilder.WaterFogColor != null)
 			{
@@ -99,6 +100,27 @@ namespace MiNET.Worlds.NBiomes
 		{
 			SurfaceBuilder.SetSeed(seed);
 			SurfaceBuilder.BuildSurface(random, chunk, this, x, z, startHeight, noise, defaultBlock, defaultFluid, seaLevel, seed, AIR_SURFACE);
+		}
+
+		public float GetTemperature(BlockPos pos)
+		{
+			if (pos.GetY() > 64)
+			{
+				float f = (float) (TemperatureNoise.GetValue(pos.GetX() / 8.0F, pos.GetZ() / 8.0F) * 4.0D);
+				return this.GetDefaultTemperature() - (f + pos.GetY() - 64.0F) * 0.05F / 30.0F;
+			}
+
+			return this.GetDefaultTemperature();
+		}
+
+		public float GetDefaultTemperature()
+		{
+			return Temperature;
+		}
+
+		public static NBiome GetBiome(BlockPos blockPos, NBiome defaultBiome)
+		{
+			return defaultBiome;
 		}
 
 		public class BiomeBuilder

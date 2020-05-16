@@ -28,7 +28,7 @@ namespace MiNET.Worlds.Generator.SurfaceBuilders
 			long seed,
 			SurfaceBuilderConfig config)
 		{
-			SurfaceBuilder.buildSurface(random, chunk, biome, x, z, startHeight, noise, defaultBlock, defaultFluid, seaLevel, seed, config);
+			SurfaceBuilder.BuildSurface(random, chunk, biome, x, z, startHeight, noise, defaultBlock, defaultFluid, seaLevel, seed, config);
 		}
 
 		public void SetSeed(long seed)

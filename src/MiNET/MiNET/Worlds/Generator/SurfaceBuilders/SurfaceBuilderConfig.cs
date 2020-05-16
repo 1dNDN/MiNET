@@ -14,5 +14,20 @@ namespace MiNET.Worlds.Generator.SurfaceBuilders
 			Middle = middle;
 			Bottom = bottom;
 		}
+
+		public Block GetTop()
+		{
+			return Top;
+		}
+
+		public Block GetMiddle()
+		{
+			return Middle;
+		}
+
+		public Block GetBottom()
+		{
+			return Bottom;
+		}
 	}
 }

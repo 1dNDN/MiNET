@@ -39,6 +39,7 @@ using log4net;
 using MiNET.Blocks;
 using MiNET.Net;
 using MiNET.Utils;
+using MiNET.Worlds.Generator.GenUtils;
 using MiNET.Worlds.NBiomes;
 
 namespace MiNET.Worlds
@@ -183,6 +184,11 @@ namespace MiNET.Worlds
 			ChunkBase chunk = GetChunk(by);
 			chunk.SetBlock(bx, by - 16 * (by >> 4), bz, bid);
 			SetDirty();
+		}
+
+		public void SetBlock(BlockPos blockPos, int blockId)
+		{
+			SetBlock(blockPos.GetX(), blockPos.GetY(), blockPos.GetZ(), blockId);
 		}
 
 		public void SetHeight(int bx, int bz, short h)

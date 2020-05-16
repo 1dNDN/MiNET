@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MiNET.Worlds.Generator
+namespace MiNET.Worlds.Generator.GenUtils
 {
 	class ChunkPos
 	{

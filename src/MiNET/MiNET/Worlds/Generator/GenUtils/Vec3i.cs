@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace MiNET.Worlds.Generator
+namespace MiNET.Worlds.Generator.GenUtils
 {
-	class Vec3i : IComparable<Vec3i>
+	public class Vec3i : IComparable<Vec3i>
 	{
 		public static Vec3i NullVector = new Vec3i(0, 0, 0);
-		private int X;
-		private int Y;
-		private int Z;
+		protected int X;
+		protected int Y;
+		protected int Z;
 
 		public Vec3i(int x, int y, int z)
 		{

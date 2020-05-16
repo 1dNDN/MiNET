@@ -1,6 +1,8 @@
-﻿namespace MiNET.Worlds.Generator
+﻿using System;
+
+namespace MiNET.Worlds.Generator.GenUtils
 {
-	class BlockPos : Vec3i
+	public class BlockPos : Vec3i
 	{
 		public static BlockPos Origin = new BlockPos(0, 0, 0);
 		private static int NumXBits = 1 + MathHelper.Log2(MathHelper.SmallestEncompassingPowerOfTwo(30000000));
@@ -36,6 +38,33 @@
 		public BlockPos Subtract(Vec3i vec)
 		{
 			return Add(-vec.GetX(), -vec.GetY(), -vec.GetZ());
+		}
+
+		public BlockPos SetPos(double x, double y, double z)
+		{
+			X = (int) Math.Floor(x);
+			Y = (int) Math.Floor(y);
+			Z = (int) Math.Floor(z);
+
+			return this;
+		}
+
+		public BlockPos SetPos(int x, int y, int z)
+		{
+			X = x;
+			Y = y;
+			Z = z;
+
+			return this;
+		}
+
+		public BlockPos SetPos(Vec3i vec)
+		{
+			X = vec.GetX();
+			Y = vec.GetY();
+			Z = vec.GetZ();
+
+			return this;
 		}
 	}
 }

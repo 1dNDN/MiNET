@@ -5,6 +5,7 @@ using System.Numerics;
 using MiNET.Blocks;
 using MiNET.Utils;
 using MiNET.Worlds.Generator;
+using MiNET.Worlds.Generator.GenUtils;
 using MiNET.Worlds.NBiomes;
 
 namespace MiNET.Worlds

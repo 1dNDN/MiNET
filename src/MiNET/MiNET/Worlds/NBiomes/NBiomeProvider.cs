@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 
 using MiNET.Worlds.Generator;
+using MiNET.Worlds.Generator.GenUtils;
 
 namespace MiNET.Worlds.NBiomes
 {
