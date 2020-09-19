@@ -7,7 +7,7 @@ namespace MiNET.Worlds.Generator.SurfaceBuilders
 	{
 		void BuildSurface(
 			LongRandom random,
-			ref ChunkColumn chunk,
+			ChunkColumn chunk,
 			NBiome biome,
 			int x,
 			int z,

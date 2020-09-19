@@ -115,7 +115,8 @@ namespace MiNET.Worlds
 			NBiome[] abiome = BiomeProvider.GetBiomeBlock(chunk.x * 16, chunk.z * 16, 16, 16);
 			chunk.SetNBiomes(abiome);
 			SetBlocksInChunk(chunk.x, chunk.z, chunk);
-			BuildSurface(ref chunk, abiome, sharedSeedRandom, settings.GetSeaLevel());
+			//chunk.CreatHeignhtMap();
+			BuildSurface(chunk, abiome, sharedSeedRandom, settings.GetSeaLevel());
 		}
 
 		private void SetBlocksInChunk(int chunkX, int chunkZ, ChunkColumn chunk)
@@ -291,7 +292,7 @@ namespace MiNET.Worlds
 		}
 
 		public void BuildSurface(
-			ref ChunkColumn chunk,
+			ChunkColumn chunk,
 			NBiome[] biomes,
 			SharedSeedRandom random,
 			int seaLevel)
@@ -308,7 +309,7 @@ namespace MiNET.Worlds
 				int i1 = i + k;
 				int j1 = j + l;
 				int k1 = chunk.GetTopBlockY(k, l) + 1;
-				biomes[l * 16 + k].BuildSurface(random, ref chunk, i1, j1, k1, adouble[l * 16 + k], new Stone(), new Water(), seaLevel, Seed);
+				biomes[l * 16 + k].BuildSurface(random, chunk, i1, j1, k1, adouble[l * 16 + k], new Stone(), new Water(), seaLevel, Seed);
 			}
 		}
 

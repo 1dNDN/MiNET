@@ -10,12 +10,12 @@ namespace MiNET.Worlds.Generator.SurfaceBuilders
 {
 	class DefaultSurfaceBuilder : ISurfaceBuilder
 	{
-		public void BuildSurface(LongRandom random, ref ChunkColumn chunk, NBiome biome, int x, int z, int startHeight, double noise, Block defaultBlock, Block defaultFluid, int seaLevel, long seed, SurfaceBuilderConfig config)
+		public void BuildSurface(LongRandom random, ChunkColumn chunk, NBiome biome, int x, int z, int startHeight, double noise, Block defaultBlock, Block defaultFluid, int seaLevel, long seed, SurfaceBuilderConfig config)
 		{
-			BuildSurface(random, ref chunk, biome, x, z, startHeight, noise, defaultBlock, defaultFluid, config.GetTop(), config.GetMiddle(), config.GetBottom(), seaLevel);
+			BuildSurface(random, chunk, biome, x, z, startHeight, noise, defaultBlock, defaultFluid, config.GetTop(), config.GetMiddle(), config.GetBottom(), seaLevel);
 		}
 
-		protected void BuildSurface(LongRandom random, ref ChunkColumn chunk, NBiome biome, int x, int z, int startHeight, double noise, Block defaultBlock, Block defaultFluid, Block top, Block middle, Block bottom, int sealevel)
+		protected void BuildSurface(LongRandom random, ChunkColumn chunk, NBiome biome, int x, int z, int startHeight, double noise, Block defaultBlock, Block defaultFluid, Block top, Block middle, Block bottom, int sealevel)
 		{
 			Block iblockstate = top;
 			Block iblockstate1 = middle;
@@ -65,23 +65,23 @@ namespace MiNET.Worlds.Generator.SurfaceBuilders
 						i = j;
 						if (i1 >= sealevel - 1)
 						{
-							chunk.SetBlock(blockPos, iblockstate.Id);
+							chunk.SetBlock(blockPos.GetX(), blockPos.GetY(), blockPos.GetZ(), iblockstate.Id);
 						}
 						else if (i1 < sealevel - 7 - j)
 						{
 							iblockstate = new Air();
 							iblockstate1 = defaultBlock;
-							chunk.SetBlock(blockPos, bottom.Id);
+							chunk.SetBlock(blockPos.GetX(), blockPos.GetY(), blockPos.GetZ(), bottom.Id);
 						}
 						else
 						{
-							chunk.SetBlock(blockPos, iblockstate1.Id);
+							chunk.SetBlock(blockPos.GetX(), blockPos.GetY(), blockPos.GetZ(), iblockstate1.Id);
 						}
 					}
 					else if (i > 0)
 					{
 						--i;
-						chunk.SetBlock(blockPos, iblockstate1.Id);
+						chunk.SetBlock(blockPos.GetX(), blockPos.GetY(), blockPos.GetZ(), iblockstate1.Id);
 						if (i == 0 && iblockstate1 is Sand && j > 1)
 						{
 							i = random.NextInt(4) + Math.Max(0, i1 - 63);
